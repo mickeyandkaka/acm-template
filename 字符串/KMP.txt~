@@ -1,0 +1,26 @@
+/*p多开一位
+s = "a  b  a  b  a  c  a  b  a"
+f = -1  0  0  1  2  3  0  1  2  3*/
+
+int fail[100010];
+void makefail(char *p){
+    int len = strlen(p), j=0;
+    fail[0]=-1, fail[1] = 0;
+    for(int i=2; i<=len; i++){
+        while(j>0 && p[j] != p[i-1])  j = fail[j];
+        if(p[j] == p[i-1])  ++j;
+        fail[i] = j;
+    }
+}
+
+int kmp(char *s,char *p){
+    int len = strlen(s),lenp=strlen(p);
+    int i,j = 0,cnt = 0;
+
+    for(i=j=0; i<len; i++){
+        while(j>0 && s[i] != p[j])   j = fail[j];
+        if(s[i] == p[j]) ++j;
+        if(j == lenp)   {cnt++; j=fail[j];}
+    }
+    return cnt;
+}

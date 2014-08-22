@@ -1,0 +1,21 @@
+int p[N],k[N];
+int find(int x)	{while (x != p[x]) p[x] = p[p[x]], x = p[x];return x;}
+
+//种类并查集
+int find(int x)
+{
+    if(x == p[x])   return x;
+    int px = p[x];
+    p[x] = find(p[x]);
+    k[x] = (k[x] + k[px ]) % K;
+    return p[x];
+}
+
+bool merge(int x,int y,int d) //x<-y d=a的种类-b的种类
+{
+    int fx = find(x), fy = find(y);
+    if(fx == fy)    return false;
+    p[fy] = fx;
+    k[fy] = ( (k[x] - k[y] - d) % K + K) % K ;
+    return true;
+}

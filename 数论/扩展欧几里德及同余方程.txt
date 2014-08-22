@@ -1,0 +1,75 @@
+LL exgcd(LL a, LL b, LL &x, LL &y)
+{
+    if(!b) {x = 1,y = 0;return a;}
+    LL d = exgcd(b, a % b, x, y);
+    LL t = x;x = y;y = t - (a / b) * y;
+    return d;
+}
+/*
+对ax+by=c
+1.若c==0 特判;
+2.c%gcd(a,b)!=0无解;
+3.保证a,b为正, 负号放到x,y中;
+4.计算ax'+by' = gcd(a,b) 得到一组 x0 = x'*c/gcd(a,b) y0 = y'*c/gcd(a,b);
+5.整数解为：
+x = x0 + b/gcd(a,b) * k
+y = y0 - a/gcd(a,b) * k	(k为整数)
+6.由a,b还原x,y正负号;
+
+X的最小非负整数解
+t = b/gcd(a,b);
+x = (x%t+t)%t;
+if(原来a<0)	x-=t,x=-x;
+*/
+
+//逆元 a/b%p = a*(b^-1)%p
+//要保证a%b == 0
+//b, p不互质时逆元不存在
+LL inv(LL b,LL p)
+{
+    LL x,y,d,t;
+    d = exgcd(b,p,x,y);
+    t = p/d;
+    x = (x%t+t)%t;
+    return x;
+}
+
+//线性同余方程 (ax = b) % p
+//-1无解 否则返回最小非负整数
+//共有d个解 x0+k(n/d) k~[0,n-1]均为解
+LL MLES(LL a, LL b, LL p)
+{
+    LL x, y, d = exgcd(a, p, x, y);
+    if(b % d) return -1;
+    x = x*b/d;
+    return (x%p+p)%p;
+}
+
+// len 是个数, b[]是余数,w[]模数
+LL china(int len, LL b[], LL w[])
+{
+    LL d, x, y, m, n = 1, res = 0;
+    for(int i=1; i<=len; i++) n *= w[i];
+    for(int i=1; i<=len; i++)
+    {
+        m = n / w[i];
+        d = exgcd(w[i], m, x, y);
+        res = (res + y * m % n * b[i] % n) % n;
+    }
+    return (n + res % n) % n;
+}
+
+// 扩展中国剩余
+LL exchina(int len,LL b[],LL w[])
+{
+    LL tp = 1, tlcm = 1, res = 0;
+    for(int i=1; i <=len; i++)
+    {
+        LL k = MLES(tp, b[i] - res, w[i]);
+        if(k == -1) return -1;
+        tlcm = lcm(tlcm, w[i]);
+        res = (res + k * tp) % tlcm;
+        tp = tlcm;
+    }
+    return res;
+}

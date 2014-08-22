@@ -1,0 +1,66 @@
+LL gcd(LL a,LL b);
+LL product_mod(LL a,LL p,LL mod);
+LL power_mod(LL a,LL p,LL mod);
+bool isprime(LL n);
+
+//1
+LL pollard_rho(LL c,LL n)//某个因子,返回n失败
+{
+    int i=1,k=2;
+    LL x=rand()%n, y=x;
+    do{
+        i++;
+        LL d = gcd(n+y-x,n);
+        if(d>1 && d<n)  return d;
+        if(i==k)    y=x,k*=2;
+        x = (product_mod(x,x,n)+n-c)%n;
+    }
+    while(y!=x);
+    return n;
+}
+
+//2
+LL rho(LL n)//最小素因子,返回n失败
+{
+    if(isprime(n))  return n;
+    while(1){
+        LL t = pollard_rho(rand()%(n-1)+1,n);
+        if(t<n){
+            LL a=rho(t),b=rho(n/t);
+            return a<b?a:b;
+        }
+    }
+}
+
+LL p[100],c[100];//c先存个数,随后存因数
+int cnt;//记得初始为0
+
+//3
+void add(LL n)//将素因子添加到素因子表中
+{
+    int i;
+    for(i=1;i<=cnt;i++)
+        if(p[i]==n) break;
+    if(i<=cnt) c[i]++;//第i个素因子个数加1
+    else
+        p[++cnt]=n,c[cnt] = 1;
+}
+
+//4因数分解
+void factor(LL n)
+{
+    if(n < 2)   return;
+    if(isprime(n))    add(n);
+    else{
+        LL p = pollard_rho(rand()%(n-1)+1,n);
+        factor(p),factor(n/p);
+    }
+}
+
+//5 合并相同的素因子 c[]数组存放因子
+for(i=1;i<=cnt;i++)
+{
+    for(j=1,k=p[i]; j<c[i]; j++)   k*=p[i];
+    c[i]=k;
+}
+//具体用法 调用4;5;

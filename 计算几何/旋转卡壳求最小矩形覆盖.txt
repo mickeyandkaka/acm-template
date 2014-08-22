@@ -1,0 +1,21 @@
+double rotating(cpoint res[],int n){
+    int j,l,r;  //j为i对锺点 l r为左右 点积求他们的距离 注意dis2
+    double ans=1E99;
+    res[n] = res[0],j=1,l=1;
+    for(int i=0; i<n; i++)
+	{
+		//默认凸包逆时针给出 否则+fabs
+        while( cross(res[i],res[i+1],res[j+1]) - cross(res[i],res[i+1],res[j]) > eps )
+            j=(j+1)%n;
+        while( dot(res[i],res[i+1],res[l+1]) - dot(res[i],res[i+1],res[l]) > eps )
+            l=(l+1)%n;
+        if(i == 0)  r = j;
+        while( dcmp(dot(res[i],res[i+1],res[r+1]) - dot(res[i],res[i+1],res[r]) ) <= 0 )
+            r=(r+1)%n;
+
+        double d = dis2(res[i],res[i+1]);
+        ans = min(ans, cross(res[i], res[i + 1], res[j])
+					* ( dot(res[i], res[i + 1], res[l]) - dot(res[i], res[i + 1], res[r]) ) / d);
+    }
+    return ans;
+}

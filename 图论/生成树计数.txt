@@ -1,0 +1,21 @@
+//C = D-G D¶ÈÊı¾ØÕó G ÁÚ½Ó¾ØÕó
+int gauss(int n)
+{
+    int ret = 1;
+    for(int i=1; i<=n; i++)
+    {
+        for(int j=i+1; j<=n; j++)
+            while(C[j][i])
+            {
+                int t = C[i][i]/C[j][i];
+                for(int k=i; k<=n; k++)
+                    C[i][k] = (C[i][k]-C[j][k]*t + mod)%mod;
+                for(int k=i; k<=n; k++)
+                    swap(C[i][k], C[j][k]);
+                ret = -ret;
+            }
+        if(C[i][i] == 0) return 0;
+        ret = ret*C[i][i]%mod;
+    }
+    return (ret+mod)%mod;
+}

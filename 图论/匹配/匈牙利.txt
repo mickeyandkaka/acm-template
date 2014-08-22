@@ -1,0 +1,45 @@
+const int XMAX = 110,YMAX = 110;
+const int EDGE_MAX = XMAX*YMAX;
+
+struct E{
+    int v, next;
+}edge[EDGE_MAX];
+
+int vis[XMAX], mat[YMAX];
+int head[XMAX],e;
+
+bool dfs(int x)
+{
+    vis[x] = 1;
+    for(int i=head[x]; ~i; i=edge[i].nxt)
+    {
+        int y = edge[i].v;
+        if(vis[mat[y]])  continue;
+        if(!mat[y] || dfs(mat[y]))
+        {
+            mat[y] = x;
+            return true;
+        }
+    }
+    return false;
+}
+
+int hungary(int n)
+{
+    int ans = 0;
+    clr(mat,0);
+    for(int i=1; i<=n; i++)
+    {
+        clr(vis,0);
+        if(dfs(i))  ans++;
+    }
+    return ans;
+}
+
+void addedge(int u,int v)
+{
+    edge[++e].v = v,edge[e].nxt = head[u];
+    head[u] = e;
+}
+
+注意head 初始化-1 num为0

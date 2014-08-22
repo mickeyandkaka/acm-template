@@ -1,0 +1,46 @@
+//±ØÒªÊ± edge.uÉ¾³ı
+const int NV = 210,NE = 21000*2;
+int head[NV], e, d[NV], vd[NV], pre[NV], cur[NV];
+struct E{
+    int u,v,w,next;
+}edge[NE];
+
+struct flow{
+    flow()   {clr(head,-1), e = 0;}
+    inline void addedge(int u, int v, int w){
+        edge[e].u = u, edge[e].v = v, edge[e].w = w, edge[e].next = head[u], head[u]=e++;
+        edge[e].u = v, edge[e].v = u, edge[e].w = 0, edge[e].next = head[v], head[v]=e++;
+    }
+
+    int sap(int s, int t, int n){
+		if(s == t)	return 0;
+        int i, mini, u = s, ret = 0;
+        clr(d,0), clr(vd,0);
+        vd[0] = n, cur[s] = head[s], pre[s] = -1;
+
+        while(d[s] < n){
+            if(u == t){
+                for(mini = INF, i = pre[u]; ~i; i = pre[edge[i].u])
+                    mini = min(mini, edge[i].w);
+                for(i = pre[u]; ~i; i = pre[edge[i].u])
+                    edge[i].w -= mini,edge[i^1].w += mini;
+                ret += mini, u = s;
+            }
+
+            for(i = cur[u]; ~i; i = edge[i].next)
+                if(edge[i].w >0 && d[u] == d[edge[i].v]+1){
+                    cur[u] = i;
+                    pre[u = edge[i].v] = i;
+                    break;
+                }
+
+            if(i == -1){
+            	if(--vd[d[u] ] == 0) break;
+            	vd[++d[u] ]++;
+                cur[u] = head[u];
+                if(u != s)  u = edge[pre[u]].u;
+            }
+        }
+        return ret;
+    }
+};

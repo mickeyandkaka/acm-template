@@ -1,0 +1,100 @@
+const int NODE_MAX = 10010;
+const int EDGE_MAX = 50010;
+
+int n,m;
+bool vis[NODE_MAX];
+int scc;//强连通分量个数
+int time;//时间
+int num;//当前连通分量里面的点的个数
+
+int head1[NODE_MAX],head2[NODE_MAX];//分别存正向 反向
+int num1,num2;//正向边 反向边的数量
+struct EDGE
+{
+    int st,ed;
+    int nxt;
+}edge1[EDGE_MAX],edge2[EDGE_MAX];
+
+int f[NODE_MAX];//结束时间戳
+int color[NODE_MAX];
+int belong[NODE_MAX];
+
+void addedge1(int st,int ed)
+{
+    edge1[++num1].st = st;
+    edge1[num1].ed = ed;
+    edge1[num1].nxt = head1[st];
+    head1[st] = num1;
+}
+
+void addedge2(int st,int ed)
+{
+    edge2[++num2].st = st;
+    edge2[num2].ed = ed;
+    edge2[num2].nxt = head2[st];
+    head2[st] = num2;
+}
+
+void dfs1(int x)
+{
+    vis[x] = true;
+    for(int i=head1[x]; ~i; i=edge1[i].nxt)
+        if(!vis[edge1[i].ed])
+            dfs1(edge1[i].ed);
+    f[++time] = x;
+}
+
+void dfs2(int x)
+{
+    vis[x] = true;
+    ++num;
+    belong[x] = scc;
+    for(int i=head2[x]; ~i; i=edge2[i].nxt)
+        if(!vis[edge2[i].ed])
+            dfs2(edge2[i].ed);
+}
+
+void kosaraju()
+{
+    time = 0;clr(vis,false);
+    for(int i=1; i<=n; i++)
+        if(!vis[i])
+            dfs1(i);
+
+    scc = 0;
+    clr(vis,false);clr(color,0);clr(belong,0);
+    for(int i=n; i>=1; i--)
+        if(!vis[f[i]])
+        {
+            num = 0; //该强连通分量里的结点数
+            ++scc;      //计算强联通分量个数
+            dfs2(f[i]);
+            color[scc] = num;//染色
+        }
+}
+
+int out_degree[NODE_MAX];//每个强联通分量的出度
+void solve()
+{
+    clr(out_degree,0);
+    for(int i=1; i<=m; i++)
+        if(belong[edge1[i].st] != belong[ edge1[i].ed ])
+            out_degree[ belong[edge1[i].st] ]++;
+
+    int tmp = 0,pos;
+    for(int i=1; i<=scc; i++)
+    {
+        if(out_degree[i] == 0)
+        {
+            ++tmp;
+            pos = i;
+        }
+    }
+
+    if(tmp != 1)    printf("0\n");
+    else    printf("%d\n",color[pos]);
+}
+
+注意
+clr(head1,-1);clr(head2,-1);
+num1 = num2= 0;

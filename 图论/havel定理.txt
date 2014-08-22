@@ -1,0 +1,48 @@
+Havel定理:给定度序列 判断无向图能否简单图化
+1: (pre) if di>=n || sum(di)%2==1 fail
+2: if di<0	fail
+3: if all di == 0 success
+4: reorder the di to non-increasing order
+5: k = d1 and remove d1
+6: subtract 1 from the first k term in the remaining
+7: goto 2.
+
+for(int i=1; i<=n; i++)
+{
+    scanf("%d",&deg[i]);
+    sum += deg[i];
+}
+
+sort(deg+1, deg+n+1, greater<int>());
+
+if(sum%2 ==1 || deg[1] >=n)
+{
+    printf("no\n");
+    continue;
+}
+
+int cnt = n;
+bool flag;
+for(int i=1; i<=n; i++)
+{
+    sort(deg+1, deg+cnt+1, greater<int>());
+
+    if(deg[cnt]<0)
+    {
+        flag = false;
+        break;
+    }
+    if(deg[1] ==0 && deg[cnt] == 0)
+    {
+        flag = true;
+        break;
+    }
+
+    int k = deg[1];
+    for(int j=2; j<=k+1; j++)   deg[j]--;
+    deg[1] = deg[cnt];
+    deg[cnt] = 0,cnt--;
+}
+
+if(flag)    printf("yes\n");
+else    printf("no\n");

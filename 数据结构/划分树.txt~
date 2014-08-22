@@ -1,0 +1,95 @@
+const int N = 100010;
+int n,q;
+
+#define L(x)    (x<<1)
+#define R(x)    (x<<1|1)
+
+struct node
+{
+    int l,r;
+    int getmid()
+    {
+        return (r+l)>>1;
+    }
+} seg[N];
+
+LL val[20][N],sorted[N];
+int toleft[20][N];
+
+
+struct Parti_tree
+{
+    Parti_tree()
+    {
+        clr(toleft,0);
+    }
+
+    void build(int root,int l,int r,int d)
+    {
+        seg[root].l = l,seg[root].r = r;
+        if(l==r)    return ;
+        int mid = (l+r)>>1;
+        int same = mid-l+1;
+
+        for(int i=l; i<=r; i++)
+            if(val[d][i]<sorted[mid])
+                same--;
+        int lpos = l,rpos = mid+1;
+        for(int i=l; i<=r; i++)
+        {
+            if(i == l)  toleft[d][i] = 0;
+            else    toleft[d][i] = toleft[d][i-1];
+
+            if(val[d][i]<sorted[mid])
+            {
+                toleft[d][i]++;
+                val[d+1][lpos++] = val[d][i];
+            }
+            else if(val[d][i]>sorted[mid])
+                val[d+1][rpos++] = val[d][i];
+            else if(same)
+            {
+                toleft[d][i]++,same--;
+                val[d+1][lpos++] = val[d][i];
+            }
+            else
+                val[d+1][rpos++] = val[d][i];
+        }
+        build(L(root),l,mid,d+1);
+        build(R(root),mid+1,r,d+1);
+    }
+
+    void init()
+    {
+        sort(sorted+1,sorted+1+n);
+        build(1,1,n,1);
+    }
+
+    LL findkth(int root,int l,int r,int d,int k)
+    {
+        if(l == r)  return val[d][l];
+        int s,ss;
+        if(l == seg[root].l)    ss = 0;
+        else    ss = toleft[d][l-1];
+        s = toleft[d][r] - ss;
+        if(s >= k)
+        {
+            int ll = seg[root].l + ss;
+            int rr = ll + s - 1;
+            return findkth(L(root), ll, rr, d+1, k);
+        }
+        else
+        {
+            int b = l - seg[root].l - ss;
+            //b表示[tree[k].lft , lft - 1]有多少个分到右边
+            int ll = seg[root].getmid() + b + 1;
+            int rr = ll + r - l - s;
+            return findkth(R(root), ll, rr, d+1,k-s);
+        }
+    }
+
+    LL query(int st,int ed,int k)
+    {
+        return findkth(1,st,ed,1,k);
+    }
+};

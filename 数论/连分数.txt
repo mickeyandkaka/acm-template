@@ -1,0 +1,19 @@
+//num为连分数序列 从0开始
+//fun1化分数为连分数,fun2化序列为分数
+int num[1000],pos;
+void fun1(int a,int b,int& pos)
+{
+    num[pos] = a/b;
+    a-=num[pos]*b;
+    if(a==1)    {num[++pos] = b;return ;}
+    fun1(b,a,++pos);
+}
+int a=0,b=1;
+void fun2(int& a,int &b,int pos)
+{
+    a += b*num[pos];
+    if(pos==0)   return;
+    int t;
+    t=a,a=b,b=t;
+    fun2(a,b,pos-1);
+}

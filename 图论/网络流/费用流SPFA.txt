@@ -1,0 +1,62 @@
+typedef int typef;
+typedef int typec;
+const int NV = 5100, NE = 40010;
+const typef INFF = 0x3f3f3f3f;
+const typec INFC = 0x3f3f3f3f;
+
+bool vis[NV];
+int e,head[NV],dist[NV],pre[NV],road[NV];
+struct E{
+    int v,next;
+    typec cost;
+    typef cap;
+}edge[NE];
+queue<int>  q;
+
+struct MCMF{
+    MCMF() {e = 0,clr(head, -1);}
+
+    void  addedge(int  u,  int  v, typef f, typec c){
+        edge[e].v=v, edge[e].cap=f, edge[e].cost = c, edge[e].next=head[u], head[u]=e++;
+        edge[e].v=u, edge[e].cap=0, edge[e].cost =-c, edge[e].next=head[v], head[v]=e++;
+    }
+
+    bool spfa(int s, int t, int n){
+        for(int i=1; i<=n; i++)  dist[i] = INFC,vis[i] = 0;//最大改-INFC
+        dist[s] = 0,pre[s] = s;
+        q.push(s);
+        while (!q.empty()){
+            int u = q.front();
+            q.pop(),vis[u] = false;
+
+            for (int i = head[u]; ~i; i = edge[i].next){
+                if (edge[i].cap <= 0) continue;
+                int v = edge[i].v;
+                if (dist[v] > dist[u] + edge[i].cost)//最大改<
+                {
+                    dist[v] = dist[u] + edge[i].cost;
+                    pre[v] = u,road[v] = i;
+                    if (!vis[v])
+                        q.push(v),vis[v] = 1;
+                }
+            }
+        }
+        return dist[t] != INFC;//最大改-INFC
+    }
+
+    void mincost(int s, int t, int n, typef &f, typec &c){
+        c = f = 0;
+		if(s == t)	return ;
+        while(spfa(s, t, n)){
+            typef minf = INFF;
+            for(int u = t; u != s; u = pre[u])
+                minf = min(minf, edge[road[u]].cap);
+            for(int u = t; u != s; u = pre[u]){
+                edge[road[u]].cap -= minf;
+                edge[road[u]^1].cap += minf;
+            }
+            f += minf;
+            c += minf * dist[t];
+        }
+    }
+};

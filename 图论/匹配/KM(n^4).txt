@@ -1,0 +1,45 @@
+int mx[MAX],my[MAX],lx[MAX],ly[MAX];
+bool vx[MAX], vy[MAX];
+int nx, ny, g[MAX][MAX]; //g需要初始化
+
+struct KM
+{
+    KM(int x,int y){
+        nx = x,ny = y;
+        clr(ly,0),clr(mx,-1),clr(my,-1);
+    }
+
+    bool path(int u){
+        vx[u] = 1;
+        for(int v=1; v<=ny; v++) if (g[u][v] == lx[u] + ly[v] && !vy[v])
+            {
+                vy[v] = 1;
+                if (my[v] == -1 || path(my[v])){
+                    mx[u] = v,my[v] = u;
+                    return true;
+                }
+            }
+        return false;
+    }
+
+    int solve(){
+        int ret = 0,j;
+        for(int i=1; i<=nx; i++)
+            for(lx[i]=-INF, j=1; j<=ny; j++)
+                lx[i] = max(lx[i], g[i][j]);
+        for(int u=1; u<=nx; u++)
+            if (mx[u] == -1){
+                clr(vx,0),clr(vy,0);
+                while(!path(u)){
+                    int ex=INF;
+                    for(int i=1; i<=nx; i++)    if (vx[i])
+                            for(int j=1; j<=ny; j++)    if(!vy[j])
+                                    ex = min(ex, lx[i] + ly[j] - g[i][j]);
+                    for(int i=1; i<=nx; i++)	if (vx[i])	lx[i] -= ex,vx[i] = 0;
+                    for(int j=1; j<=ny; j++)	if (vy[j])	ly[j] += ex,vy[j] = 0;
+                }
+            }
+        for(int i=1; i<=nx; i++)    ret += g[i][mx[i]];
+        return ret;
+    }
+};

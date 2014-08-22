@@ -1,0 +1,152 @@
+//hdu1255
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+
+const int MAX = 1010;
+
+//离散化数组
+double y[2*MAX+10];
+
+//线段定义
+struct line
+{
+	double x, y1, y2;		//y2 > y1
+	int flag;				//标记添加还是删除
+}Line[2*MAX+10];
+
+//线段树定义 这里是[l,r]
+struct SegTree
+{
+	int left, right;		//离散化后的左右端点
+	int c;					//表示当前矩形被覆盖的次数
+	double len;				//表示当前线段范围内覆盖的长度
+	double len_2;			//覆盖至少两次的长度
+}Tree[(2*MAX+10)*5];
+
+//按X轴扫描 从小到大
+int cmp(line a,line b)		
+{
+	return a.x < b.x; 
+}
+
+void build(int l, int r, int k)
+{
+	Tree[k].left  = l;
+	Tree[k].right = r;
+	Tree[k].c     = 0;
+	Tree[k].len   = 0.0;
+	Tree[k].len_2 = 0.0;
+
+	if(r - l == 1)
+		return;
+
+	int mid = (l + r)>>1;
+
+	build(l, mid, 2*k);
+	build(mid, r, 2*k+1);
+}
+
+void calen(int k)
+{
+	if(Tree[k].c > 0)			//当前线段有覆盖就直接使用其长度 
+	{
+		Tree[k].len = y[Tree[k].right]-y[Tree[k].left];
+		return; 
+	} 
+	else if(Tree[k].right - Tree[k].left == 1)
+		Tree[k].len = 0; 
+	else						//利用下面的 
+		Tree[k].len = Tree[2*k].len + Tree[2*k+1].len; 
+}
+
+void calen2(int k)			//计算覆盖两次以上的长度 
+{
+	if(Tree[k].c >= 2)
+		Tree[k].len_2 = y[Tree[k].right] - y[Tree[k].left];
+	else if(Tree[k].left == Tree[k].right - 1)
+		Tree[k].len_2 = 0;
+	else if(Tree[k].c == 1)//讨论一下 
+		Tree[k].len_2=Tree[k*2].len+Tree[k*2+1].len; 
+	else
+		Tree[k].len_2=Tree[k*2].len_2+Tree[k*2+1].len_2;
+
+}
+
+void modify(line e,int k)
+{
+	if(e.y1 == y[Tree[k].left] && e.y2 == y[Tree[k].right])
+	{
+		Tree[k].c += e.flag;			//插入线段与删除线段 
+		calen(k);						//处理其覆盖长度
+		calen2(k);
+		return;
+	} 
+
+	int mid=(Tree[k].left + Tree[k].right)>>1;
+
+	if(e.y2 <= y[mid])
+		modify(e, k*2);
+	else if(e.y1 >= y[mid])
+		modify(e, k*2+1);
+	else
+	{
+		line tmp;
+
+		tmp.x=e.x;tmp.y1=e.y1;tmp.y2=y[mid];tmp.flag=e.flag;		//线段向下插入 
+		modify(tmp, k*2);
+
+		tmp.y1=y[mid];tmp.y2=e.y2;
+		modify(tmp, k*2+1);
+	} 
+
+	calen(k);							//递归的向上求解其线段的覆盖长度
+	calen2(k);
+}
+
+
+int main()
+{
+	//freopen("in.txt","r",stdin);
+	int cas;
+	int n;
+
+	scanf("%d",&cas);
+
+	while(cas--)
+	{
+		int t=1;
+		double x1, x2, y1, y2;
+		double ans = 0.0;
+
+		scanf("%d",&n);
+
+		for(int i=1; i<=n; i++) 
+		{
+			scanf("%lf%lf%lf%lf",&x1,&y1,&x2,&y2);
+
+			Line[t].flag=1;						//将x坐标小的放在前面，且标记为1 
+			Line[t+1].flag=-1;					//下面的标记为-1
+			Line[t].x=x1;Line[t+1].x=x2;
+			Line[t].y1=y1;Line[t+1].y1=y1;y[t]=y1;
+			Line[t].y2=y2;Line[t+1].y2=y2;y[t+1]=y2;
+			t=t+2;
+		}
+
+		sort(Line+1, Line+t, cmp);
+		sort(y+1, y+t);							//纵坐标的离散化 
+
+		build(1, t-1, 1);						//按照纵坐标建树  这里不减也行
+		modify(Line[1],1);
+
+		for(int i=2; i<=t-1; i++)
+		{
+			ans += Tree[1].len_2 * (Line[i].x-Line[i-1].x);	//上面覆盖的变长加上矩形的高 
+			modify(Line[i], 1);
+		}
+
+		printf("%.2lf\n",ans);
+	}
+	return 0;
+}
+

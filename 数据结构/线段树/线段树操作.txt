@@ -1,0 +1,35 @@
+//段修改 段求和
+void pushup(int rt)
+{
+    seg[rt].sum = seg[L(rt)].sum + seg[R(rt)].sum;
+}
+
+void pushdown(int rt)
+{
+    if(seg[rt].lazy)
+    {
+        seg[L(rt)].lazy += seg[rt].lazy;
+        seg[R(rt)].lazy += seg[rt].lazy;
+        seg[L(rt)].sum += seg[rt].lazy * (seg[L(rt)].r - seg[L(rt)].l);
+        seg[R(rt)].sum += seg[rt].lazy * (seg[R(rt)].r - seg[R(rt)].l);
+        seg[rt].lazy = 0;
+    }
+}
+
+//段增加 段最值
+void pushup(int rt)
+{
+    seg[rt].maxi = max(seg[L(rt)].maxi , seg[R(rt)].maxi);
+}
+
+void pushdown(int rt)
+{
+    if(seg[rt].lazy)
+    {
+        seg[L(rt)].lazy += seg[rt].lazy;
+        seg[R(rt)].lazy += seg[rt].lazy;
+        seg[L(rt)].maxi += seg[rt].lazy;
+        seg[R(rt)].maxi += seg[rt].lazy;
+        seg[rt].lazy = 0;
+    }
+}

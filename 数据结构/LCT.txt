@@ -1,0 +1,263 @@
+#define type int
+#define keytree root->ch[1]->ch[0]
+const int N = 300005,inf=0x3f3f3f3f;
+struct Node{
+    int val,maxv,minv,lazy,id,size,sum,rev;
+    Node *ch[2], *pre ;
+    int isroot,isnull;
+    void Add(int v){
+        if(id<0)return ;
+        lazy+=v;
+        val+=v;
+        minv+=v;
+        maxv+=v;
+    }
+    void Update(){
+        if(id<0)return ;
+        size = ch[0]->size + ch[1]->size + 1;
+        minv = min(val, min(ch[0]->minv, ch[1]->minv));
+        maxv = max(val, max(ch[0]->maxv, ch[1]->maxv));
+        sum = val + ch[0]->sum + ch[1]->sum;
+    }
+    void Reverse(){
+        if(id<0)return ;
+        swap(ch[0],ch[1]);
+        rev^=1;
+    }
+    void PushDown(){
+        if(id<0)return ;
+        if (lazy){
+            ch[0]->Add(lazy);
+            ch[1]->Add(lazy);
+            lazy=0;
+        }
+        if(rev){
+            ch[0]->Reverse();
+            ch[1]->Reverse();
+            rev=0;
+        }
+
+    }
+};
+type arr[N];
+Node* Hash[N]; // Hash[i]指向id = i的节点，方便查找其位置(id值唯一)
+
+class LinkCut{
+    int eid,n;
+    int head[N],ed[N<<1],nxt[N<<1];
+    Node *stk[N], data[N];
+    int cnt, top;
+    Node *null;
+    bool vis[N];
+public:
+    int val[N];
+    /*
+    * 获得一个新的节点，之前删除的节点会放到stk中以便再利用
+    * id表示这个节点的编号，会和Hash数组对应起来，编号从1到n
+    */
+    Node *NewNode(int id,type var){
+        Node *p;
+        if (top) p = stk[top--];
+        else p = &data[cnt++];
+        p->val = p->minv = p->maxv = var;
+        p->id = id;
+        p->size = p->isroot = 1;
+        p->isnull = 0;
+        p->lazy = 0; p->sum = var;
+        p->ch[0] = p->ch[1] = p->pre = null;
+        if(id>0)Hash[id]=p;
+        return p;
+    }
+    void AddEdge(int s,int e){
+        ed[eid]=e;nxt[eid]=head[s];head[s]=eid++;
+        ed[eid]=s;nxt[eid]=head[e];head[e]=eid++;
+    }
+
+    void Init(int n){
+        this->n=n;
+        top=cnt=eid=0;
+        clr(head,-1);
+        null=NewNode(-1,inf);
+        null->size=0;
+        null->maxv=-inf;
+        null->sum=0;
+        null->isnull=1;
+    }
+    /*
+    * 旋转操作, c=0 表示左旋, c=1 表示右旋
+    */
+    void Rotate(Node *x, int c){
+        Node *y = x->pre;
+        y->PushDown();
+        x->PushDown();
+        y->ch[!c] = x->ch[c];
+        if (x->ch[c] != null)
+            x->ch[c]->pre = y;
+        x->pre = y->pre;
+        if(y->isroot)y->isroot=0,x->isroot=1;
+        else y->pre->ch[ y == y->pre->ch[1] ] = x;
+        x->ch[c] = y;
+        y->pre = x;
+        y->Update();
+    }
+    /*
+     * 旋转使x成为根节点
+     * x会执行pushdown和update的操作
+     */
+    void Splay(Node *x){
+        x->PushDown();
+        while (!x->isroot){
+            if (x->pre->isroot){
+                Rotate(x, x->pre->ch[0] == x);
+                break;
+            }
+            Node *y = x->pre;
+            Node *z = y->pre;
+            int c = (y == z->ch[0]);
+            if (x == y->ch[c]){// 之字形旋转
+                Rotate(x, !c);Rotate(x, c);
+            }
+            else{// 一字形旋转
+                Rotate(y, c);Rotate(x, c);
+            }
+        }
+        x->Update();
+    }
+    void Dfs(int s,Node * f){
+        Node *p=NewNode(s,val[s]);
+        p->pre=f;
+        vis[s]=1;
+        for(int i=head[s];~i;i=nxt[i])
+            if(!vis[ed[i]])Dfs(ed[i],p);
+    }
+    /*
+     * 构建根据给定的森林用dfs建立link-cut tree。
+     */
+    void BuildTree(){
+        clr(vis,0);
+        for(int i=1;i<=n;i++)
+            if(!vis[i])Dfs(i,null);
+        for(int i=1;i<=n;i++)
+            Access(Hash[i]);
+    }
+    /*
+     * 访问节点x,从根节点一直访问到x并更新Auxiliary Tree。
+     * 返回值是包含节点x的Auxiliary Tree的根
+     */
+    Node* Access(Node * x){
+        Node* y;
+        for(y=null;x!=null;y=x,x=x->pre){
+            Splay(x);
+            x->ch[1]->isroot=1;
+            x->ch[1]=y;y->isroot=0;
+            x->Update();
+        }
+        return y;
+    }
+    /*
+     * 返回节点x所在的树的根节点
+     */
+     Node* FindRoot(Node * x){
+         x=Access(x);
+         while(x->ch[0]!=null)x=x->ch[0];
+         Splay(x);
+         return x;
+     }
+
+     void Evert(Node *x){
+        Access(x)->Reverse();
+     }
+
+     void AddVal(Node* a,Node* b,int v){
+         Evert(a);
+         b=Access(b);
+         b->Add(v);
+     }
+     /*
+      * 取链上的节点最小值，关于链的策略与链上加值一样
+      */
+     int GetMin(Node* a,Node* b){
+         Evert(a);b=Access(b);
+         return b->minv;
+     }
+     /*
+      * 取链上的节点最大值，关于链的策略与链上加值一样
+      */
+     int GetMax(Node* a,Node* b){
+         Evert(a);b=Access(b);
+         return b->maxv;
+     }
+     int GetSum(Node* a,Node* b){
+         Evert(a);b=Access(b);
+         return b->sum;
+     }
+     void Cut(Node* x){
+         Access(x);Splay(x);
+         x->ch[0]->isroot=1;
+         x->ch[0]->pre=null;
+         x->ch[0]=null;
+     }
+     void Link(Node* x,Node* y){
+         Evert(x);Splay(x);
+         x->pre=y;
+         Access(x);
+     }
+     Node* FindFa(Node* x){
+        Access(x);
+        Node* y=x->ch[0];
+        if(y==null)return y;
+        while(y->ch[1]!=null)y=y->ch[1];
+        Splay(y);
+        return y;
+     }
+}lct;
+
+int n;
+
+int main(){
+//    freopen("/home/axorb/in","r",stdin);
+//    freopen("/home/axorb/out","w",stdout);
+    while(~scanf("%d",&n)){
+        lct.Init(n);
+        for(int i=1;i<n;i++){
+            int a,b;scanf("%d%d",&a,&b);
+            lct.AddEdge(a,b);
+        }
+        for(int i=1;i<=n;i++){
+            int a;scanf("%d",&a);
+            lct.val[i]=a;
+        }
+        lct.BuildTree();
+        int m;scanf("%d",&m);
+        while(m--){
+            int a,b,c,d;
+            scanf("%d",&a);
+            if(a==3)scanf("%d",&d);
+            scanf("%d%d",&b,&c);
+            int rb=lct.FindRoot(Hash[b])->id;
+            int rc=lct.FindRoot(Hash[c])->id;
+            if(a==1){
+                if(rb==rc)
+                    puts("-1");
+                else
+                    lct.Link(Hash[b],Hash[c]);
+            }else if(a==2){
+                if(b==c||rb!=rc)puts("-1");
+                else{
+                    lct.Evert(Hash[b]);
+                    lct.Cut(Hash[c]);
+                }
+            }else if(a==3){
+                if(rb!=rc)puts("-1");
+                else{
+                    lct.AddVal(Hash[b],Hash[c],d);
+                }
+            }else{
+                if(rb!=rc)puts("-1");
+                else printf("%d\n",lct.GetMax(Hash[b],Hash[c]));
+            }
+        }
+//        lct.debug();
+        puts("");
+    }
+}

@@ -1,0 +1,4 @@
+A^x = A^(x % Phi(C) + Phi(C)) (mod C)
+n/d 设d=2^A * 5^B * m 其中gcd(m,10)=1 则小数中不循环部分的长度是max(A,B) 循环节的长度是最小的某个k使得10^k mod m = 1
+inv[1]=1;
+for(i=2; i<mod; i++)	inv[i] = inv[mod%i]*(mod-mod/i)%mod;

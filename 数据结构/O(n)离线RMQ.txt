@@ -1,0 +1,44 @@
+const int MAX = 250010;
+const int MAXQ = 500010;
+
+int num[MAX];
+int p[MAX];
+int find(int x) {return p[x] == x ? p[x] : p[x] = find(p[x]);}
+void merge(int x,int y) {int px = find(x),py = find(y);p[py] = px;}
+
+int head[MAX],stk[MAX],qnt,top,cnt;
+PII data[MAXQ];
+int ans[MAXQ],next[MAXQ];
+int n,q;
+
+struct RMQ
+{
+    RMQ(){clr(head,-1),qnt=cnt=0;}
+
+    void addquery(int a,int b)
+    {
+        data[++qnt]=PII(a,++cnt);
+        next[qnt]=head[b];
+        head[b] = qnt;
+    }
+
+    void solve()
+    {
+        for(int i=1; i<=n; i++)
+        {
+            p[i] = i;
+            while(top && num[stk[top]] >= num[i])//最小 最大改成<=
+                merge(i,stk[top--]);
+            stk[++top]=i;
+
+            PII* tmp;
+            for(int j=head[i]; ~j; j=next[j])
+            {
+                tmp=data+j;
+                ans1[tmp->second]=num[find(tmp->first)];
+            }
+        }
+        for(int i=1; i<=q; i++)
+            printf("%f\n",ans[i]);
+    }
+};

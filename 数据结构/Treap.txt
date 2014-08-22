@@ -1,0 +1,105 @@
+typedef int type;
+struct node
+{
+    type key;
+    int fix,sz,cnt;
+    node*c[2];
+    node(type v,node*n):key(v)
+    {
+        c[0]=c[1]=n,sz = cnt = 1;
+        fix = rand();
+    }
+    void rz()   {sz=c[0]->sz+c[1]->sz+cnt;}
+}*root,*null;
+
+struct Treap
+{
+    Treap()
+    {
+        null = new node(0,0);
+        null->sz=0,null->fix=INF;
+        root=null;
+    }
+
+    void rotate(node* &t,bool d)
+    {
+        node*c = t->c[d];
+        t->c[d] = c->c[!d];
+        c->c[!d]=t;
+        t->rz(),c->rz();
+        t=c;
+    }
+
+    void insert(node*&t,type x)
+    {
+        if(t==null)
+        {
+            t = new node(x,null);
+            return;
+        }
+
+        if(x==t->key)
+        {
+            t->cnt++,t->sz++;
+            return;
+        }
+        bool d = x > t->key;
+        insert(t->c[d],x);
+        if(t->c[d]->fix < t->fix)   rotate(t,d);
+        else    t->rz();
+    }
+
+    void Delete(node*&t,type x)
+    {
+        if(t==null) return;
+        if(t->key == x)
+        {
+            if(t->cnt > 1)
+            {
+                t->cnt--,t->sz--;
+                return;
+            }
+
+            bool d=t->c[1]->fix < t->c[0]->fix;
+            if(t->c[d]==null)
+            {
+                delete t;
+                t=null;
+                return;
+            }
+            rotate(t,d);
+            Delete(t->c[!d],x);
+        }
+        else
+        {
+            bool d=x > t->key;
+            Delete(t->c[d],x);
+        }
+        t->rz();
+    }
+
+    int find(node *t,type x)
+    {
+        if (t==null)    return 0;
+        else if (x < t->key)    return find(t->c[0],x);
+        else if (x > t->key)    return find(t->c[1],x);
+        else    return t->cnt;
+    }
+
+    type select(node* t,int k)
+    {
+        int r=t->c[0]->sz;
+        if(k <= r) return select(t->c[0],k);
+        if(k > r+t->cnt) return select(t->c[1],k-r-t->cnt);
+        return t->key;
+    }
+
+    int rank(node*t,type x)
+    {
+        if(t==null) return 0;
+        int r=t->c[0]->sz;
+        if(x < t->key) return rank(t->c[0],x);
+        if(x > t->key) return r+t->cnt+rank(t->c[1],x);
+        return r+1;
+    }
+};

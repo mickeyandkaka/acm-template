@@ -1,0 +1,31 @@
+//随机增量 O(n)
+void center(cpoint p0, cpoint p1, cpoint p2, cpoint &cp) { //三角形外心
+    double a1 = p1.x-p0.x, b1 = p1.y-p0.y, c1 = (a1*a1+b1*b1)/2;
+    double a2 = p2.x-p0.x, b2 = p2.y-p0.y, c2 = (a2*a2+b2*b2)/2;
+    double d = a1 * b2 - a2 * b1;
+    cp.x = p0.x + (c1 * b2 - c2 * b1) / d;
+    cp.y = p0.y + (a1 * c2 - a2 * c1) / d;
+}
+
+void mincir(cpoint cp[], int n, cpoint &c, double &r){
+    random_shuffle(cp, cp + n);
+    c = cp[0],r = 0;
+    for(int i=1; i<n; i++)
+    {
+        if(dcmp(dis(cp[i], c) - r) <= 0) continue;
+        c = cp[i],r = 0;
+        for (int j = 0; j<i; j++)
+        {
+            if(dcmp(dis(cp[j], c) - r) <= 0) continue;
+            c.x = (cp[i].x + cp[j].x) / 2;
+            c.y = (cp[i].y + cp[j].y) / 2;
+            r = dis(c, cp[j]);
+            for(int k=0; k<j; k++)
+            {
+                if(dcmp(dis(cp[k], c) - r) <= 0) continue;
+                center(cp[i], cp[j], cp[k], c);
+                r = dis(c, cp[k]);
+            }
+        }
+    }
+}

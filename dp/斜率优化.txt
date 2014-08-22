@@ -1,0 +1,62 @@
+LL f1(int p1,int p2) {	//分子   
+}
+
+LL f2(int p1,int p2) {  //分母
+}
+
+LL g(int i,int j) {  //状态转移
+}
+
+
+//f1/f2 > k 且 k单调不降
+for(int i=k; i<=n; i++)
+{
+	//维护队尾后满足 f(a,b)<f(b,c)<f(c,d)<.....（严格单调递增）
+    while(st < ed && f1(q[ed-1],q[ed])*f2(q[ed],i-k) >= f1(q[ed],i-k)*f2(q[ed-1],q[ed])) ed--;
+    q[++ed] = i-k;
+	
+	//维护队头后满足 k<f(a,b)<f(b,c)<f(c,d)<
+    while(st < ed && f2(q[st],q[st+1])*i <= f1(q[st],q[st+1])) st++;
+    dp[i] = g(i,q[st]);
+}
+//维护队列[st,ed]
+
+设g(k,i)=  dp[i]+sum[k]-sum[i]-a[i+1]*(k-i)  (i<k)
+也就是从i转移到 k，dp[k]的值，
+
+假设 g(k,i)<g(k,j)  (i<j<k)
+dp[i]+sum[k]-sum[i]-a[i+1]*(k-i)<dp[j]+sum[k]-sum[j]-a[j+1]*(k-j)
+化简后可得
+dp[i]-dp[j]-(sum[i]-sum[j])+a[i+1]*i-a[j+1]*j<k*(a[i+1]-a[j+1])
+因为a是递增的，所以a[i+1]<a[j+1];
+（dp[i]-dp[j]-(sum[i]-sum[j])+a[i+1]*i-a[j+1]*j）/(a[i+1]-a[j+1])>k
+现在设 
+f(i,j)=（dp[i]-dp[j]-(sum[i]-sum[j])+a[i+1]*i-a[j+1]*j）/(a[i+1]-a[j+1]
+可以知道 (i<j<K)
+f(i,j)>k   <=>  g(k,i) < g(k,j)
+f(i,.j)=k  <=>   g(k,i) = g(k,j)
+f(i,j)<k   <=>  g(k,i) > g(k,j)
+以上是我们对于斜率优化如何维护队列头和尾元素的所需要的基本知识。
+接下来是维护队列
+
+一．先是维护队尾：
+假设 队尾前一个元素是 a,队尾元素是b ,现在要把 c加进队列 (a<b<c)
+如果满足  f(a,b)>=f(b,c)    =>    g(k,b)>=g(k,c) 或 g(k,b)>=g(k,a)
+也就是 b不会成为更新 k 的元素，此时可以吧b删除。
+证明： 
+（1） 当f(a,b)>=f(b,c)>=k   
+      =>        g(k,a)<=g(k,b)<=g(k,c)     =>  a是最优解
+（2） 当k>=f(a,b)>=f(b,c)
+=>       g(k,a)>= g(k,b)>=g(k,c)     =>  c是最优解
+（3） 当f(a,b)>=k>=f(b,c)
+=>       g(k,a)<=g(k,b)   g(k,c)<=g(k,b)     => a或c是最优解  
+综上 b 不会成为最优解。
+此时队列 a,b,c,d,e,f........  维护队尾后满足 f(a,b)<f(b,c)<f(c,d)<.....（严格单调递增）
+
+二．维护队头
+队列元素为 a,b,c,d....  
+如果此时当f(a,b)<k    =>     g(k,a)>g(k,b)     a不是最优解此时可以吧a删除。（因为k满足单调递增，所以对以后的k, f(a,b)<k 依旧成立）
+现在整个队列维护成
+k<f(a,b)<f(b,c)<f(c,d)<........
+也就是 g(k,a)<g(k,b)<g(k,c)  队头元素即使最优解。
+dp[k]=g(k,a);

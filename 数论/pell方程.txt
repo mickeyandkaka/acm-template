@@ -1,0 +1,28 @@
+//求x^2-ny^2=1的最小解 n不为完全平方数
+class pell{
+	BigInteger[] solve(int n){
+		BigInteger ans[] = new BigInteger[2];
+		BigInteger N, p0, p1, q0, q1, a0, a1, a2, g1, g2, h1, h2, p, q;
+		
+		a0 = a1 = BigInteger.valueOf((long)Math.sqrt(n*1.0));
+		h1 = p1 = q0 = BigInteger.ONE;
+		g1 = p0 = q1 = BigInteger.ZERO;
+		N = BigInteger.valueOf(n);
+		for(int i=2; ;i++){
+			g2 = a1.multiply(h1).subtract(g1);      //g2=a1*h1-g1  
+            h2 = N.subtract(g2.pow(2)).divide(h1);  //h2=(n-g2^2)/h1   
+            a2 = g2.add(a0).divide(h2);             //a2=(g2+a0)/h2  
+			p = a1.multiply(p1).add(p0);
+			q = a1.multiply(q1).add(q0);
+			if(p.pow(2).subtract(N.multiply(q.pow(2))).equals(BigInteger.ONE)){
+				ans[0] = p;
+				ans[1] = q;
+				break;
+			}
+			g1 = g2;h1 = h2;a1 = a2;  
+            p0 = p1;p1 = p;  
+            q0 = q1;q1 = q; 	
+		}
+		return ans;
+	}
+}

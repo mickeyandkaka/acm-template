@@ -1,0 +1,71 @@
+#pragma comment(linker,"/STACK:65536000")
+
+int readint()   //用于整数
+{
+    char c;
+    while (c = getchar(), '-' != c && !isdigit(c))
+        if(c == EOF)	return EOF;
+    int f = 1;
+    if ('-' == c)
+        f = -1,c = getchar();
+    int x = c - '0';
+    while (isdigit(c = getchar()))
+        x = x * 10 + c - '0';
+    return x * f;
+}
+
+void write(int a) {  //用于正整数 
+  if(a>9) write(a/10); 
+  putchar(a%10+'0'); 
+}
+
+#include <cstdio>
+#include <ext/rope>
+ 
+__gnu_cxx::crope s;
+int t,cur,k,i;
+char op[10],buf[1<<21],c;
+ 
+int main()
+{
+    scanf("%d",&t);
+    for(;t>0;t--)
+    {
+        scanf("%s",op);
+        switch(op[0])
+        {
+            case 'M':
+                scanf("%d",&cur);
+                break;
+            case 'I':
+                scanf("%d",&k);i=0;
+                while(k)
+                {
+                    c=getc(stdin);
+                    if(c>=32&&c<=126)
+                    {
+                        buf[i++]=c;
+                        k--;
+                    }
+                }
+                buf[i]=0;
+                s.insert(cur,buf);
+                break;
+            case 'D':
+                scanf("%d",&k);
+                s.erase(cur,k);
+                break;
+            case 'G':
+                scanf("%d",&k);
+                puts(s.substr(cur,k).c_str());
+                break;
+            case 'P':
+                cur--;
+                break;
+            case 'N':
+                cur++;
+                break;
+        }
+    }
+    return 0;
+}

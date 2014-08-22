@@ -1,0 +1,89 @@
+const int INF = 0x3f3f3f3f;
+const int T = 9;
+const int N = T*T*T+10;
+const int M = T*T*T*4+T*T*4+10;
+int id;
+int L[M],R[M],U[M],D[M];
+int ANS[N],SUM[N],COL[M],ROW[M],H[N];
+//ROW,COL 为对应ID的行和列
+//H为行指针头 列不需要
+
+struct Dancing_links
+{
+	Dancing_links() {}
+    Dancing_links(int n,int m)
+    {
+        for(int i=0; i<=m; i++)
+        {
+            SUM[i] = 0;
+            L[i+1] = D[i] = U[i] = i;
+            R[i]=i+1;
+        }
+        L[m+1]=R[m]=0,L[0]=m,id=m+1;
+        clr(H,-1);
+    }
+
+    void remove(int c)
+    {
+        L[R[c]] = L[c];
+        R[L[c]] = R[c];
+        for(int i=D[c]; i!=c; i=D[i])
+            for(int j=R[i]; j!=i; j=R[j])
+            {
+                U[D[j]] = U[j];
+                D[U[j]] = D[j];
+                SUM[COL[j]]--;
+            }
+    }
+
+    void resume(int c)
+    {
+        for(int i=U[c]; i!=c; i=U[i])
+            for(int j=L[i]; j!=i; j=L[j])
+            {
+                U[D[j]] = D[U[j]] = j;
+                SUM[COL[j]]++;
+            }
+        L[R[c]] = R[L[c]] = c;
+    }
+
+    void add(int r,int c)
+    {
+        ROW[id] = r,COL[id] = c;
+        SUM[c]++;
+        D[id] = D[c],U[D[c]] = id,U[id] = c,D[c] = id;
+
+        if(H[r] < 0)
+            H[r] = L[id] = R[id] = id;
+        else
+            R[id] = R[H[r]],L[R[H[r]]] = id,L[id] = H[r],R[H[r]] = id;
+        id++;
+    }
+
+    int dlx(int k)
+    {
+        if(R[0] == 0)
+        {
+            /*output the answer*/return k;
+        }
+
+        int s=INF,c;
+        for(int i=R[0]; i; i=R[i])
+            if(SUM[i] < s)
+                s=SUM[c=i];
+
+        remove(c);
+        for(int r=D[c]; r!=c; r=D[r])
+        {
+            ANS[k] = ROW[r];
+            for(int j=R[r]; j!=r; j=R[j])	remove(COL[j]);
+
+            int tmp = dlx(k+1);
+            if(tmp != -1) return tmp; //delete if multipal answer is needed
+
+            for(int j=L[r]; j!=r; j=L[j])	resume(COL[j]);
+        }
+        resume(c);
+        return -1;
+    }
+};

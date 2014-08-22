@@ -1,0 +1,79 @@
+const int NV = 5010;
+const int NE = 200010;
+
+struct node
+{
+    int pos,w,h;
+    bool operator < (const node& b)const{
+        return h > b.h;
+    }
+    node(){}
+    node(int a,int b,int c)
+    {
+        pos = a,w=b,h=c;
+    }
+};
+
+priority_queue<node> q;
+int vis[NV];
+int head[NV],e,d[NV];
+int ed[NE],w[NE],nxt[NE];
+
+void addedge(int u,int v,int val)
+{
+    ed[e] = v,w[e] = val;
+    nxt[e] = head[u],head[u] = e++;
+}
+
+void dijkstra(int st,int n)
+{
+    for(int i=1; i<=n; i++) d[i] = (i==st ? 0 : INF);
+    clr(vis,0);
+    while(!q.empty())   q.pop();
+    q.push(node(st,0,d[st]));
+
+    while(!q.empty())
+    {
+        node t = q.top(); q.pop();
+        int u = t.pos;
+
+        if(vis[u])  continue;
+        vis[u] = 1;
+        for(int i=head[u]; ~i; i=nxt[i])
+        {
+            if(i%2 == 0)    continue;//看图的有向无向
+            int v = ed[i], val = w[i];
+            if(d[v] > d[u]+val)
+            {
+                d[v] = d[u]+val;
+                q.push(node(v,0,d[v]));
+            }
+        }
+    }
+}
+
+int astar(int st,int end,int k)
+{
+    clr(vis,0);
+    while(!q.empty())   q.pop();
+    q.push(node(st,0,d[st]));
+
+    while(!q.empty())
+    {
+        int u = q.top().pos;
+        int curw = q.top().w;
+        q.pop();
+
+        vis[u]++;
+        if(u == end && vis[u] == k)  return curw;
+        if(vis[u] > k) continue;
+
+        for(int i=head[u]; ~i; i=nxt[i])
+        {
+            if(i&1) continue;//看图的有向无向
+            int v = ed[i], val = w[i];
+            q.push(node(v,curw+val,curw+val+d[v]));
+        }
+    }
+    return -1;
+}

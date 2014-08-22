@@ -1,0 +1,19 @@
+LL product_mod(LL a,LL p,LL mod){
+    LL r = 0;
+    while(p){
+        if(p&1) r = (r+a)%mod;
+        a = (a+a)%mod;
+        p>>=1;
+    }
+    return r;
+}
+
+LL power_mod(LL a,LL p,LL mod){
+    LL r = 1;
+    while(p){
+        if(p&1) r = product_mod(r,a,mod);
+        a = product_mod(a,a,mod);
+        p>>=1;
+    }
+    return r;
+}

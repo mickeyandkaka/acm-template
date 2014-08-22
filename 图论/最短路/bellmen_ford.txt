@@ -1,0 +1,27 @@
+struct e
+{
+	int u,v;
+	int w;
+}edge[6000];
+
+int dist[501];
+bool vis[6000];
+const int INF=0x3f3f3f3f;
+
+bool bellman_ford(void)
+{
+	for(int i=1;i<=n;i++)
+		dist[i]=INF;
+	dist[1]=0;
+
+	for(int i=1;i<=n-1;i++)
+		for(int j=1;j<=2*m+w;j++)
+			if(dist[edge[j].v] > dist[edge[j].u] + edge[j].w)
+				dist[edge[j].v] = dist[edge[j].u] + edge[j].w;
+
+
+	for(int j=1;j<=2*m+w;j++)
+		if(dist[edge[j].v] > dist[edge[j].u] + edge[j].w)
+			return false;
+	return true;
+}

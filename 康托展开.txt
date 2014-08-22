@@ -1,0 +1,34 @@
+//1-n排列 返回比他小的排列的个数
+int fac[10] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880};
+int zip(int *a, int n)
+{
+    int ans = 0, j, r;
+    bool p[10] = {0};
+    for (int i = 0; i < n; i++)
+    {
+        for (j = 1, r = 0; j <= a[i]; j++)
+            if (p[j] == 0) r++;
+        ans += (r - 1) * fac[n - 1 - i];
+        p[ a[i] ] = 1;
+    }
+    return ans;
+}
+
+void unzip(int s, int *a,int n)
+{
+    int j, r;
+    bool p[10] = {0};
+    for (int i=0; i<n; i++)
+    {
+        int t = s / fac[n-1-i]+1;
+        s %= fac[n-1-i];
+        r = 0, j = 1;
+        while (1)
+        {
+              if (p[j] == 0) r++;
+              if (r == t) break;
+              j++;
+        }
+        p[ a[i] = j ] = 1;
+    }
+}

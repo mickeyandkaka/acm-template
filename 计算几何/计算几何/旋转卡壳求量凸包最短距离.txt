@@ -1,0 +1,48 @@
+void anticlockwise(cpoint cp[], int n)
+{
+    for (int i=0; i <n-2; ++i)
+    {
+        double t = cross(cp[i], cp[i + 1], cp[i + 2]);
+        if (dcmp(t) > 0) return ;
+        if (dcmp(t) < 0)
+        {
+            reverse(cp, cp + n);
+            return;
+        }
+    }
+}
+
+// 旋转卡壳，两凸包必须逆时针，并且需要把两凸包交换再做一遍
+double rotating(cpoint ch1[], int n, cpoint ch2[], int m)
+{
+    int p = 0, q = 0; //p,q分别找yminP,ymaxQ 注意凸包给出的顺序
+    for (int i = 0; i < n; ++i)
+        if (dcmp(ch1[i].y - ch1[p].y) < 0)
+            p = i;
+    for (int i = 0; i < m; ++i)
+        if (dcmp(ch2[i].y - ch2[q].y) > 0)
+            q = i;
+			
+    ch1[n] = ch1[0],ch2[m] = ch2[0];
+    double tmp, res = 1e99;
+    for (int i = 0; i < n; ++i)
+    {
+        while ((tmp = cross(ch1[p], ch1[p + 1], ch2[q + 1]) -
+                      cross(ch1[p], ch1[p + 1], ch2[q])) > eps)
+            q = (q + 1) % m;
+        if (dcmp(tmp) < 0)
+            res = min(res, PointToSeg(ch2[q], ch1[p], ch1[p + 1]));
+        else
+            res = min(res,DisPallSeg(ch1[p],ch1[p+1],ch2[q],ch2[q+1]));
+        p = (p + 1) % n;
+    }
+    return res;
+}
+
+double solve()
+{
+	//使凸包逆时针化 做过凸包后不必要
+    anticlockwise(ch1, n);
+    anticlockwise(ch2, m);
+    return min(rotating(ch1, n, ch2, m), rotating(ch2, m, ch1, n));
+}

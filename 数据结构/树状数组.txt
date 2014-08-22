@@ -1,0 +1,97 @@
+//sum操作均为1~x
+int a[10000],b[10000],c[10000];
+int size;
+
+int lowbit(int x){
+    return x&(-x);
+}
+
+/********************************************/
+//单点
+void add(int i,int num){
+    for(; i<=n; arr[i]+=num,i+=lowbit(i));
+}
+//前缀和
+int query(int i){
+    int s = 0;
+    for(; i; s+=arr[i],i-=lowbit(i));
+    return s;
+}
+/********************************************/
+
+//O(n) a数组全加1
+for(int i=1; i<=n; i++)
+    a[i] = lowbit(i);
+
+/********************************************/
+int getk(int k)
+{
+    int ans = 0;
+    for(int i=maxlog; i>=0; i--)
+    {
+        ans += 1<<i;
+        if(ans > n || a[ans]>=k)	ans -= 1<<i;
+        else	k -= a[ans];
+    }
+    return ans+1;
+}
+/********************************************/
+
+
+/********************************************/
+//段增加，点查询 加辅助数组b
+//操作 add(l-1, -c);add(r, c);   sum(x);
+void add(int x, int v){
+    for (int i=x; i; i-=lowbit(i)) b[i]+=v;
+}
+//单点值
+int sum(int x){
+    int res = 0;
+    for (int i=x; i<=size; i+=lowbit(i)) res+=b[i];
+    return res;
+}
+/********************************************/
+
+
+/********************************************/
+//段增加，段查询 加辅助数组b,c
+//操作 add_b(r, c); add_c(r, c);
+//     if (l > 1) {add_b(l-1, -c); add_c(l-1,-c);}
+//      x=0时不能执行SUM_B操作和ADD_C
+void add_b(int x, int v){
+    for (int i=x; i; i-=lowbit(i)) b[i]+=v;
+}
+void add_c(int x, int v){
+    for (int i=x; i<=size; i+=lowbit(i)) c[i]+=x*v;
+}
+int sum_b(int x){
+    int res = 0;
+    for (int i=x; i<=size; i+=lowbit(i)) res+=b[i];
+    return res;
+}
+int sum_c(int x){
+    int res = 0;
+    for (int i=x; i; i-=lowbit(i)) res+=c[i];
+    return res;
+}
+inline int sum(int x){
+    if (x) return sum_b(x)*x + sum_c(x-1);
+    else return 0;
+}
+/********************************************/
+
+//二维,三维类似
+void modify(int x,int y,int v){
+    for(int i=x; i<=size; i+=lowbit(i))
+        for(int j=y; j<=size; j+=lowbit(j))
+            c[i][j] += v;
+}
+
+int sum(int x,int y)
+{
+    int ans=0;
+	for(int i=x; i; i-=lowbit(i))
+        for(int j=y; j; j-=lowbit(j))
+	        ans += c[i][j];
+	return ans;
+}

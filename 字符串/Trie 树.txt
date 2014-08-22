@@ -1,0 +1,43 @@
+const int M = 100010;
+const int ch = 52;
+int sw[128];
+int trie[M][ch],top;
+int word[M];
+
+void init()
+{
+    clr(trie[0],0),clr(word,0),top = 1;
+    int j = 0;
+    for(char i='a'; i<='z'; i++,j++)
+        sw[i] = j;
+    for(char i='A'; i<='Z'; i++,j++)
+        sw[i] = j;
+}
+
+void insert(char *s)
+{
+    int rt;
+    for(rt=0; *s; s++)
+    {
+        int nxt = trie[rt][sw[*s]];
+        if(nxt == 0)
+        {
+            clr(trie[top],0);
+            trie[rt][sw[*s]] = nxt = top++;
+        }
+        rt = nxt;
+    }
+    word[rt]++;
+}
+
+int search(char *s)
+{
+    int rt;
+    for(rt = 0; *s; s++)
+    {
+        if(trie[rt][sw[*s]] == 0)
+            return 0;
+        rt = trie[rt][sw[*s]];
+    }
+    return word[rt];
+}

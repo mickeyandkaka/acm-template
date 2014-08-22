@@ -1,0 +1,57 @@
+一般解题用到height数组+二分答案
+字串计数：height扫一便，算贡献
+最长重叠/不重叠字串： 二分答案 判断组的大小和最大最小位置的差值
+
+/* 
+rank[0...7]: 4 6 8 1 2 3 5 7 
+string:      a a b a a a a b 
+------------------------------------------- 
+ sa[1] = 3 : a a a a b         height[1] = 0 
+ sa[2] = 4 : a a a b           height[2] = 3 
+ sa[3] = 5 : a a b             height[3] = 2 
+ sa[4] = 0 : a a b a a a a b   height[4] = 3 
+ sa[5] = 6 : a b               height[5] = 1 
+ sa[6] = 1 : a b a a a a b     height[6] = 2 
+ sa[7] = 7 : b                 height[7] = 0 
+ sa[8] = 2 : b a a a a b       height[8] = 1 
+*/ 
+
+const int MAXN = 200010;
+int r[MAXN],sa[MAXN];
+int ua[MAXN],ub[MAXN],uv[MAXN],us[MAXN];
+int cmp(int *r,int a,int b,int l)
+{return r[a] == r[b] && r[a+l]==r[b+l];}
+
+//r[]存放原字符串，且从char变为int 范围r[0]~r[n-1], r[n] = 0
+//da(r, sa, n + 1, 256); (m为字符集 一般取128 或 256)
+//calh(r, sa, n);
+
+void da(int *r,int *sa,int n,int m)   
+{									  
+    int i,j,p,*x = ua,*y = ub,*t;
+    for(i=0; i<m; i++)  us[i] = 0;
+    for(i=0; i<n; i++)  us[x[i] = r[i]]++;
+    for(i=1; i<m; i++)  us[i] += us[i-1];
+    for(i=n-1; i>=0; i--)   sa[--us[x[i]]] = i;
+    for(j=1,p=1; p<n; j<<=1,m=p)
+    {
+        for(p=0,i=n-j; i<n; i++)    y[p++] = i;
+        for(i=0; i<n; i++)  if(sa[i]>=j) y[p++]=sa[i]-j;
+        for(i=0; i<n; i++)  uv[i] = x[y[i]];
+        for(i=0; i<m; i++)  us[i] = 0;
+        for(i=0; i<n; i++)  us[uv[i]]++;
+        for(i=1; i<m; i++)  us[i]+=us[i-1];
+        for(i=n-1; i>=0; i--) sa[--us[uv[i]]] = y[i];
+        for(t=x,x=y,y=t,p=1,x[sa[0]]=0,i=1; i<n; i++)
+           x[sa[i]] = cmp(y,sa[i-1],sa[i],j)?p-1:p++;
+    }
+}
+
+int rank[MAXN], height[MAXN];
+void calh(int *r, int *sa, int n)
+{
+    int i, j, k = 0;
+    for(i=1; i<=n; ++i) rank[sa[i]] = i;
+    for(i=0; i<n; height[rank[i++]] = k)
+        for(k?k--:0,j=sa[rank[i]-1]; r[i+k]==r[j+k];k++);
+}

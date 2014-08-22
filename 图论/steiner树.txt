@@ -1,0 +1,64 @@
+int dp[NV][1<<6];
+bool vis[NV][1<<6];
+
+struct node
+{
+    int u,s;
+    node() {}
+    node(int a,int b):u(a),s(b){}
+};
+queue<node> q;
+
+int steiner(int n,int m) //n个必选点 m个全部点
+{
+    clr(dp,0x3f),clr(vis,false);
+    for(int i=0; i<=m; i++) dp[i][0] = 0;
+
+    while(!q.empty())   q.pop();
+
+    for(int i=0; i<n; i++)
+    {
+        int s = (1<<i);
+        dp[i+1][s] = 0;
+        vis[i+1][s] = true;
+        q.push(node(i+1,s));
+    }
+
+    while(!q.empty())
+    {
+        int u=q.front().u, s=q.front().s;
+        q.pop();
+
+        vis[u][s]=false;
+
+        for(int t=0; t<(1<<n); t++)//不同层
+        {
+            if(s&t) continue;
+            int st=(s|t);
+            if(dp[u][st] > dp[u][s] + dp[u][t])
+            {
+                dp[u][st] = dp[u][s] + dp[u][t];
+                if(!vis[u][st])
+                {
+                    vis[u][st] = true;
+                    q.push(node(u,st));
+                }
+            }
+        }
+
+        for(int i=head[u]; ~i; i=nxt[i])//同层
+        {
+            int v=ed[i];
+            if(dp[v][s] > dp[u][s] + w[i])
+            {
+                dp[v][s] = dp[u][s] + w[i];
+                if(!vis[v][s])
+                {
+                    vis[v][s]=true;
+                    q.push(node(v,s));
+                }
+            }
+        }
+    }
+    return dp[0][(1<<n)-1];
+}

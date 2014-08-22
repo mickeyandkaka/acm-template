@@ -1,0 +1,49 @@
+int n,m;
+const int NV = 40010, NE = 40010*2, NQ = 210;
+int p[NV];
+int find(int x) {while (x != p[x]) p[x] = p[p[x]], x = p[x];return x;}
+void merge(int x,int y) {int px = find(x),py = find(y);p[py] = px;}
+
+struct E{
+    int v,w,next;
+} edge[NE];
+
+struct Q{
+    int v,id,next;
+} query[NQ];
+
+int head2[NV],q,head[NV],e,ans[NQ],lv[NV];
+bool check[NV];
+
+struct LCA{
+    LCA(int n){
+        clr(head,-1),e=0,clr(head2,-1),q=0;
+        clr(lv,-1),clr(check,false);
+        for(int i=1; i<=n; i++) p[i] = i;
+    }
+
+    void addedge(int u,int v,int w){
+        edge[++e].v=v,edge[e].w = w,edge[e].next = head[u],head[u] = e;
+        edge[++e].v=u,edge[e].w = w,edge[e].next = head[v],head[v] = e;
+    }
+
+    void addquery(int u,int v,int id){
+        query[++q].v = v,query[q].id=id,query[q].next = head2[u],head2[u] = q;
+        query[++q].v = u,query[q].id=id,query[q].next = head2[v],head2[v] = q;
+    }
+
+    void lca(int u,int d){
+        lv[u] = d, p[u] = u;
+        for(int i = head[u]; ~i; i=edge[i].next){
+            int v=edge[i].v , w=edge[i].w;
+            if(~lv[v])  continue;
+            lca(v,d+w);
+            merge(u,v);
+        }
+        check[u] = true;
+        for(int i=head2[u]; ~i; i=query[i].next){
+            int v=query[i].v , id = query[i].id;
+            if(check[v])    ans[id] = lv[v]+lv[u]-2*lv[find(v)];
+        }
+    }
+};

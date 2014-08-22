@@ -1,0 +1,60 @@
+//W=V dp判可达 cnt 表示当前的面值需要几个当前的物品
+for(int i=1; i<=n; i++)
+{
+    num += c[i]*v[i];
+    int bound = min(num,lim);
+    clr(cnt,0);
+    for(int j=v[i]; j<=bound; j++)
+    {
+        if(!dp[j] && dp[j-v[i]] && cnt[j-v[i]]<c[i])
+        {
+            cnt[j] = cnt[j-v[i]]+1;
+            res++;
+            dp[j] = true;
+        }
+    }
+}
+
+//二进制拆分
+procedure MultiplePack(cost,weight,amount)
+    if cost*amount>=V
+        CompletePack(cost,weight)
+        return
+    integer k=1
+    while k<num
+        ZeroOnePack(k*cost,k*weight)
+        amount=amount-k
+        k=k*2
+    ZeroOnePack(amount*cost,amount*weight)
+
+//单调队列优化
+int w[60],v[60],a[60];
+int n;
+
+int complete(int n,int lim)	{
+    for(int i=1; i<=n; i++)
+    {
+        for(int d=0; d<v[i]; d++)
+        {
+            st = 1,ed = 0;
+            for(int j=0; j<=(lim-d)/v[i]; j++)
+            {
+                int val = dp[j*v[i] + d]-j*w[i];
+                while(st<=ed && K[ed] <= val)	ed--;
+                K[++ed] = val;
+                L[ed] = j;
+                while(st<=ed && L[st] < j-a[i])   st++;
+                if(st <= ed)
+                    dp[j*v[i]+d] = K[st]+j*w[i];
+            }
+        }
+    }
+    return dp[lim];
+}
+
+//分组背包
+for(int i=1; i<=n; i++) //组数
+	for(int j=m; j>=0; j--) //容量
+		for(int k=1; k<=m; k++)//费用
+			if(j>=k)//这里的费用就是K 注意费用
+				dp[j] = max(dp[j],dp[j-k]+w[i][k]);

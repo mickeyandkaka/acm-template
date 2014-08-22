@@ -1,0 +1,103 @@
+//1.不可修改
+//节点数量级一般20倍(n<=1E5)
+const int N = 100005;
+int num[N];
+int hash[N],cnt;
+int T,n,q;
+
+int ls[N*20],rs[N*20],sum[N*20];
+int tree[N],tot;
+void build(int l, int r,int &rt)
+{
+    rt = ++tot, sum[rt] = 0;
+    if(l == r)  return;
+    int mid = (l + r)>>1;
+    build(l, mid, ls[rt]);
+    build(mid+1, r, rs[rt]);
+}
+
+void update(int pre,int v,int l,int r,int &rt)
+{
+    rt = ++tot;
+    ls[rt] = ls[pre], rs[rt] = rs[pre], sum[rt] = sum[pre] + 1;
+    if(l == r) return ;
+    int mid = (l + r)>>1;
+    if(v <= mid) update(ls[pre], v, l, mid, ls[rt]);
+    else update(rs[pre], v, mid+1, r, rs[rt]);
+}
+
+int query(int le,int ri,int l,int r,int k)
+{
+    if(l==r) return l;
+    int mid = (l + r)>>1, cnt = sum[ls[ri]] - sum[ls[le]];
+    if(k <= cnt)    return query(ls[le], ls[ri], l ,mid, k);
+    else    return query(rs[le], rs[ri], mid+1, r, k-cnt);
+}
+
+int main()
+{
+    scanf("%d",&T);
+    while(T--)
+    {
+        scanf("%d%d",&n,&q);
+        for(int i=1; i<=n; i++)
+        {
+            scanf("%d",&num[i]);
+            hash[i] = num[i];
+        }
+        sort(hash+1, hash+1+n);
+        cnt = unique(hash+1, hash+1+n) - (hash+1);
+        for(int i=1; i<=n; i++) num[i] = lower_bound(hash+1,hash+1+cnt,num[i]) - hash;
+
+        tot = 0;
+        build(1, cnt, tree[0]);
+        for(int i=1; i<=n; i++) update(tree[i-1], num[i], 1, cnt, tree[i]);
+
+        for(int i=1; i<=q; i++)
+        {
+            int l, r, k;
+            scanf("%d%d%d",&l,&r,&k);
+            printf("%d\n",hash[query(tree[l-1], tree[r], 1, cnt, k)]);
+        }
+    }
+    return 0;
+}
+
+//2.可修改单点 至少nlog^2(n)节点 1E4约*225
+//build update一样
+
+void modify(int x,int val,int w)
+{
+    for(; x<=n; x+=low(x))
+        update(tree[x], val, 1, cnt, tree[x], w);
+}
+
+int que(int l,int r,int k)
+{
+    if(l == r)     return l;
+    int mid = (l + r) >> 1;
+    int sa = 0,sb = 0;
+    for(int i=1; i<=ll; i++) sa += sum[ls[L[i]]];
+    for(int i=1; i<=rr; i++) sb += sum[ls[R[i]]];
+    int del = sb - sa;
+    if(k <= del)
+    {
+        for(int i=1; i<=ll; i++) L[i]=ls[L[i]];
+        for(int i=1; i<=rr; i++) R[i]=ls[R[i]];
+        return que(l, mid, k);
+    }
+    else
+    {
+        for(int i=1; i<=ll; i++) L[i]=rs[L[i]];
+        for(int i=1; i<=rr; i++) R[i]=rs[R[i]];
+        return que(mid+1, r, k-del);
+    }
+}
+
+int query(int l,int r,int k)
+{
+    ll = 0,rr = 0;
+    for(; l ; l-=low(l)) L[++ll] = tree[l];
+    for(; r ; r-=low(r)) R[++rr] = tree[r];
+    return que(1, cnt, k);
+}

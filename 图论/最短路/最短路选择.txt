@@ -1,0 +1,4 @@
+				稠密图				稀疏图				有负权边
+SSSP			Dij+heap			SPFA (或Dij+heap)	SPFA
+APSP(无向图)	SPFA(优化)/Floyd	SPFA(优化)			SPFA(优化)
+APSP(有向图)	Floyd				SPFA (或Dij+heap)	SPFA

@@ -1,0 +1,32 @@
+LL dp[N][2];
+//dfs1-> 表示子树的最长路 次长路 dfs2-> 表示整棵树所到的最长路 次长路
+void dfs1(int u, int f){
+	for(int i=head[u]; ~i; i=edge[i].next){
+		int v = edge[i].v, w = edge[i].w;
+		if(v == f)	continue;
+		dfs1(v, u);
+		if(dp[v][0] + w > dp[u][0]){
+			dp[u][1] = dp[u][0];
+			dp[u][0] = dp[v][0] + w;
+		}
+		else if(dp[v][0] + w > dp[u][1])
+			dp[u][1] = dp[v][0] + w;
+	}
+}
+
+void dfs2(int u, int f){
+	for(int i=head[u]; ~i; i=edge[i].next){
+		int v = edge[i].v, w = edge[i].w , tmp = edge[i].w;
+		if(v == f)	continue;
+		if(dp[v][0] + w != dp[u][0]) tmp += dp[u][0];
+		else tmp += dp[u][1];
+
+		if(tmp > dp[v][0]){
+			dp[v][1] = dp[v][0];
+			dp[v][0] = tmp;
+		}
+		else if(tmp > dp[v][1])
+			dp[v][1] = tmp;
+		dfs2(v, u);
+	}
+}

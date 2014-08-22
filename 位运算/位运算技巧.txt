@@ -1,0 +1,26 @@
+#define setbit(x,y) x|=(1<<(y))
+#define clrbit(x,y) x&=~(1<<(y))
+
+//u的二进制1的个数
+__builtin_popcount (unsigned u)
+
+//生成下个相同1的数
+int nextN(int n)
+{
+    int x = n&(-n);
+    int t = n+x;
+    return ((n^t)/x)>>2|t;
+}
+
+//1...1(m位)0..0(n-m位)
+(1<<n)-(1<<(n-m))
+
+//换位
+int revbit(int x){
+    x = ((x >> 1) & 0x55555555) | ((x << 1) & 0xaaaaaaaa);
+    x = ((x >> 2) & 0x33333333) | ((x << 2) & 0xcccccccc);
+    x = ((x >> 4) & 0x0f0f0f0f) | ((x << 4) & 0xf0f0f0f0);
+    x = ((x >> 8) & 0x00ff00ff) | ((x << 8) & 0xff00ff00);
+    x = ((x >>16) & 0x0000ffff) | ((x <<16) & 0xffff0000);
+    return x;
+}

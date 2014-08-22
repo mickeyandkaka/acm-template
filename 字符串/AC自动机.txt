@@ -1,0 +1,61 @@
+const int ch = 26;
+const int M = 1005;
+int sw[128],top;
+int trie[M][ch], fail[M];
+int word[M];
+int q[M],bg,ed;
+
+void init()
+{
+    clr(trie[0],0),clr(word,0),top = 1;
+    for(int i='a',j=0; i<='z'; i++,j++)
+        sw[i] = j;
+}
+
+void insert(char *s,int val)
+{
+    int rt,nxt;
+    for(rt = 0; *s; s++,rt = nxt)
+    {
+        nxt = trie[rt][sw[*s]];
+        if(nxt == 0)
+        {
+            clr(trie[top],0);
+            trie[rt][sw[*s]] = nxt = top++;
+        }
+    }
+    word[rt] = val;
+}
+
+void makefail()
+{
+    fail[0] = bg = ed = 0;
+    for(int i=0; i<ch; i++)
+        if(q[ed] =  trie[0][i])
+            fail[q[ed++] ] = 0;
+
+    while(bg < ed)
+    {
+        int u = q[bg++], v;
+        for(int i=0; i<ch; i++)
+        {
+            if(v = trie[u][i])
+            {
+                q[ed++] = v;
+                fail[v] = trie[fail[u] ][i];
+                //对word[v]按word[fail[v]]里的内容进行处理
+            }
+            else    trie[u][i] = trie[fail[u] ][i];
+        }
+    }
+}
+
+void ac(char *s)
+{
+    for(int rt = 0; *s; s++)
+    {
+        rt = trie[rt][sw[*s]];
+        for(int j=rt; j; j=fail[j])
+			……;
+    }
+}

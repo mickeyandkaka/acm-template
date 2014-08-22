@@ -1,0 +1,20 @@
+int out_degree[NODE_MAX];//每个强联通分量的出度
+int color[NODE_MAX];//每个强联通分量的点数
+
+void solve()
+{
+    clr(out_degree,0);
+    for(int i=1; i<=m; i++)
+        if(belong[edge1[i].st] != belong[ edge1[i].ed ])
+            out_degree[ belong[edge1[i].st] ]++;
+
+    int tmp = 0,pos;
+    for(int i=1; i<=scc; i++)
+        if(out_degree[i] == 0){
+            ++tmp;
+            pos = i;
+        }
+
+    if(tmp != 1)    printf("0\n");
+    else    printf("%d\n",color[pos]);
+}

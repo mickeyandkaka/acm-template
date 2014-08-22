@@ -1,0 +1,123 @@
+//bzoj 1977
+const int N = 100010;
+const int M = 300010;
+  
+struct E
+{
+    int u,v;
+    int w;
+    bool operator<(const E&a)const{
+        return w<a.w;
+    }
+}edge[M];
+  
+bool chose[M];
+int p[N];
+int find(int x){
+    return p[x] == x?x:p[x] = find(p[x]);
+}
+  
+int head[N],e;
+int ed[2*M],next[2*M];
+int val[2*M];
+void addedge(int u,int v,int w)
+{
+    ed[e] = v,val[e] = w;
+    next[e] = head[u],head[u]= e++;
+}
+  
+int max1[N],max2[N],min1,min2;
+int num[N];
+VI g[N];
+  
+void dfs(int u,int p)
+{
+    int len = g[u].size();
+    for(int i=0; i<len; i++)	dfs(g[u][i],p);
+    for(int i=head[u]; ~i; i=next[i])
+    {
+        if(chose[i>>1]) continue;
+        int v= ed[i];
+        LL w = val[i];
+        if(find(v) == p)
+        {
+            chose[i>>1] = true;
+            if(w < min1){min2 = min1;min1 = w;}
+            else if(w < min2 && w>min1){min2 = w;}
+        }
+    }
+}
+  
+int main()
+{
+    int n,m;
+    while(~scanf("%d%d",&n,&m))
+    {
+        for(int i=0; i<m; i++)
+            scanf("%d%d%d",&edge[i].u,&edge[i].v,&edge[i].w);
+        sort(edge,edge+m);
+  
+        for(int i=1; i<=n; i++)
+        {
+            head[i] = -1;
+            max1[i] = max2[i] = -1;
+            g[i].clear();
+            num[i] = 1;
+            p[i] = i;
+        }
+        e = 0;
+        for(int i=0; i<m; i++)
+        {
+            chose[i] = false;
+            addedge(edge[i].u,edge[i].v,edge[i].w);
+            addedge(edge[i].v,edge[i].u,edge[i].w);
+        }
+  
+        LL mst = 0,ans = INF;
+  
+        for(int i=0; i<m; i++)
+        {
+            if(chose[i])    continue;
+            int fx = find(edge[i].u);
+            int fy = find(edge[i].v);
+            int v = edge[i].w;
+            mst+=v;
+            chose[i] = true;
+  
+            if(num[fx] > num[fy])
+                swap(fx,fy);
+  
+            LL v4[4] ={max1[fx],max2[fx],max1[fy],max2[fy]};
+            max1[fx] = v;
+            sort(v4,v4+4);
+            for(int i=3; i>=0; i--)
+                if(v4[i]!= v)
+                {
+                    max2[fx] = v4[i];
+                    break;
+                }
+  
+            min1 = min2 = INF;
+            dfs(fx,fy);
+  
+            if(min1 != INF)
+            {
+                if(min1 == max1[fx])
+                {
+                    if(~max2[fx])
+                        ans = min(ans,(LL)min(min1-max2[fx],min2 - max1[fx]));
+                }
+                else
+                    ans = min(ans,(LL)min1-max1[fx]);
+  
+            }
+  
+            num[fx] += num[fy];
+            g[fx].push_back(fy);
+            p[fy] = fx;
+        }
+        printf("%lld\n",mst+ans);
+    }
+  
+    return 0;
+}

@@ -1,0 +1,56 @@
+const int MAX = 4E7; //1s数量级
+bool isprm[MAX+10];
+int prm[2500000];
+
+int select(int n)
+{
+    clr(isprm, true);
+    int cnt = 0;
+    for(int i=2; i<=n; i++)
+    {
+        if(isprm[i])    prm[++cnt] = i;
+        for(int j=1; j<=cnt && LL(i)*prm[j]<=n; j++)
+        {
+            isprm[ i*prm[j] ] = false;
+            if(i % prm[j] == 0)  break;
+        }
+    }
+    return cnt;
+}
+
+//最小素因子
+const int MAX = 2E7;
+bool isprm[MAX+10];
+int prm[MAX+10],fac[MAX+10];
+
+int minfac(int n)
+{
+    fac[1] = 1;
+    clr(isprm, true);
+    int cnt = 0;
+    for(int i=2; i<=n; i++)
+    {
+        if(isprm[i])    prm[++cnt] = fac[i] = i;
+        for(int j=1; j<=cnt && (LL)i*prm[j]<=n; j++)
+        {
+            isprm[ i*prm[j] ] = false;
+            fac[ i*prm[j] ] = prm[j];
+            if(i % prm[j] == 0)  break;
+        }
+    }
+    return cnt;
+}
+
+//区间筛[L,R]素数 R-L不能太大
+if(L == 1)  L++;
+clr(ans,true);
+for(int i=1; i<=cnt && (LL)prime[i]*(LL)prime[i]<=R; i++)
+{
+    LL st = L/prime[i]+(L%prime[i]>0);
+    if(st==1)   st++;
+    for(LL j=st*prime[i]; j<=R; j+=prime[i])
+        ans[j-L] = false;
+}
+c = 0;
+for(LL i=L; i<=R; i++)
+    if(ans[i-L])	t[++c] = i;

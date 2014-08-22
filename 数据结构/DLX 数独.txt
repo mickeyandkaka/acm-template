@@ -1,0 +1,58 @@
+//Êı¶ÀĞèÒª
+const int T = 9;
+const int S = 3;
+char maze[T+5][T+5];
+char ans[T+5][T+5];
+bool v[M];
+
+void place(int &r,int &c1,int &c2,int &c3,int &c4,int i,int j,int k)
+{
+    r=(i*T+j)*T+k;
+    c1=i*T+j+1;
+    c2=T*T+i*T+k;
+    c3=T*T*2+j*T+k;
+    c4=T*T*3+((i/S)*S+(j/S))*T+k;
+}
+
+void suduko_output(int k)
+{
+    for(int i=0; i<k; i++)
+    {
+        int x=(ANS[i]-1)/(T*T);
+        int y=((ANS[i]-1)/T)%T;
+        int v=(ANS[i]-1)%T+1;
+        ans[x][y]=v+'0';
+    }
+
+    for(int i=0; i<T; i++)
+        printf("%s\n",ans[i]);
+}
+
+bool suduko()
+{
+    clr(v,false);
+    int r,c1,c2,c3,c4;
+
+    for(int i=0; i<T; i++)
+        for(int j=0; j<T; j++)
+            if(maze[i][j] != '0')
+            {
+                place(r,c1,c2,c3,c4,i,j,maze[i][j]-'0');
+                add(r,c1),add(r,c2),add(r,c3),add(r,c4);
+                v[c2]=v[c3]=v[c4]=true;
+            }
+
+    for(int i=0; i<T; i++)
+        for(int j=0; j<T; j++)
+            if(maze[i][j] == '0')
+                for(int k=1; k<=T; ++k)
+                {
+                    place(r,c1,c2,c3,c4,i,j,k);
+                    if(v[c2]||v[c3]||v[c4]) continue;
+                    add(r,c1),add(r,c2),add(r,c3),add(r,c4);
+                }
+
+    int ans =-1;
+    ans = dlx(0);
+    return ans?true:false;
+}

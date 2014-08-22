@@ -1,0 +1,13 @@
+//凸包要求逆时针给出 不然叉积加绝对值
+double rotating(cpoint res[],int n){
+    int j=1; double ans=0;
+    res[n] = res[0];
+    for(int i=0; i<n; i++)
+	{
+		//默认凸包逆时针给出 否则+fabs
+        while( cross(res[i],res[i+1],res[j+1]) - cross(res[i],res[i+1],res[j]) > eps )
+            j=(j+1)%n;
+        ans = max(ans, max(dis(res[i], res[j]), dis(res[i+1], res[j+1])) );
+    }
+    return ans;
+}

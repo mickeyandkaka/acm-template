@@ -1,0 +1,32 @@
+char dig[100];
+int dp[20][3];
+//不含62 状态不够多开维数
+LL dfs(int pos, int st, bool bound)
+{
+    if(pos == -1)	return (st != 2);
+    if(!bound && ~dp[pos][st])	return dp[pos][st];
+
+    int end = bound ? dig[pos]-'0' : 9;
+    LL ret = 0;
+    for(int i=0; i<=end; i++)
+	{
+		if(i == 4 || st == 2)	ret += dfs(pos-1, 2, bound && i == end);
+		else if(i == 2)
+		{
+			if(st == 1)	ret += dfs(pos-1, 2, bound && i == end);
+			else	ret += dfs(pos-1, 0, bound && i == end);
+		}
+		else if(i == 6) ret += dfs(pos-1, 1, bound && i == end);
+		else	ret += dfs(pos-1, 0, bound && i == end);
+	}
+    if (!bound) dp[pos][st] = ret;
+    return ret;
+}
+
+LL cal(LL a)
+{
+    sprintf(dig,"%I64d", a);
+    int len = strlen(dig);
+    reverse(dig, dig+len);
+    return dfs(len-1, 0, 1);
+}

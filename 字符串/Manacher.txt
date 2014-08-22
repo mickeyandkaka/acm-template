@@ -1,0 +1,28 @@
+const int MAX = 120000;
+char str[MAX],r[2*MAX];
+int p[2*MAX];
+
+int manacher()
+{
+    int len = strlen(str);
+    int n = 0;
+    r[n++] = '$',r[n++] = '#';
+    for(int i=0; i<len; i++){
+        r[n++] = str[i];
+        r[n++] = '#';
+    }
+    r[n] = 0;
+
+    int mx = 0,id;
+    for(int i=1; i<n; i++){
+        if(mx > i)  p[i] = min(p[2*id-i],mx-i);
+        else    p[i] = 1;
+
+        for(;r[i-p[i]] == r[i+p[i]]; p[i]++);
+        if(p[i]+i > mx)	mx=p[i]+i,id=i;
+    }
+    int ans = 0;
+    for(int i=1; i<n; i++)
+        ans = max(ans,p[i]-1);
+    return ans;
+}

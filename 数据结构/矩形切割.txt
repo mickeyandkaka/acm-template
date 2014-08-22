@@ -1,0 +1,15 @@
+int x1[1001],y1[1001],x2[1001],y2[1001],color[1001],cnt[2501],n;
+void cover(int dx, int dy, int ux, int uy, int c, int h)
+{
+    while( (h<=n) && ( (dx>=x2[h]) || (ux<=x1[h]) ||
+        (dy>=y2[h]) || (uy<=y1[h]) ) )
+    h++;
+    if (h > n) cnt[c] += (uy-dy)*(ux-dx);
+    else{
+        if (dx<x1[h]) cover(dx, max(y1[h],dy), min(x1[h],ux), max(y1[h],uy), c, h+1);
+        if (dy<y1[h]) cover(min(x2[h],dx), dy, min(x2[h],ux), min(y1[h],uy), c, h+1);
+        if (ux>x2[h]) cover(max(x2[h],dx), min(y2[h],dy), ux, min(y2[h],uy), c, h+1);
+        if (uy>y2[h]) cover(max(x1[h],dx), max(y2[h],dy), max(x1[h],ux), uy, c, h+1);
+    }
+}
+//倒序染色

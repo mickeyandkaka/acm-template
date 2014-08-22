@@ -1,0 +1,82 @@
+const int XMAX = 50010;
+const int YMAX = 50010;
+
+struct Edge
+{
+    int v,next;
+}edge[150010];
+
+int head[XMAX],e;
+bool vis[YMAX];
+int dx[XMAX],dy[YMAX];
+int mx[XMAX],my[YMAX];
+
+void addedge(int u,int v)
+{
+    edge[e].v = v,edge[e].next = head[u];
+    head[u] = e++;
+}
+
+bool bfs(int n)
+{
+    queue<int> q;
+    clr(dx,-1),clr(dy,-1);
+    for(int i=1; i<=n; i++)
+        if(mx[i] == -1)
+            q.push(i),dx[i]= 0;
+
+    bool flag = false;
+    while(!q.empty())
+    {
+        int u = q.front();
+        q.pop();
+        for(int i=head[u]; ~i; i=edge[i].next)
+        {
+            int v = edge[i].v;
+            if(dy[v] == -1)
+            {
+                dy[v] = dx[u]+1;
+                if(my[v] == -1)
+                    flag = true;
+                else
+                {
+                    dx[ my[v] ] = dy[v]+1;
+                    q.push( my[v] );
+                }
+            }
+        }
+    }
+    return flag;
+}
+
+bool dfs(int u)
+{
+    for(int i=head[u]; ~i; i=edge[i].next)
+    {
+        int v = edge[i].v;
+        if(!vis[v] && dy[v] == dx[u]+1)
+        {
+            vis[v] = 1;
+            if(my[v]==-1 || dfs(my[v]))
+            {
+                my[v] = u, mx[u] = v;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+int HK(int n)
+{
+    int ans = 0;
+    clr(mx,-1),clr(my,-1);
+    while(bfs(n))
+    {
+        clr(vis,false);
+        for(int i=1; i<=n; i++)
+            if(mx[i] == -1 && dfs(i))
+                ans++;
+    }
+    return ans;
+}

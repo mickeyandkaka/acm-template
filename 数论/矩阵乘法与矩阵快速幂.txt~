@@ -1,0 +1,66 @@
+//待修改 sum利用矩阵改非递归
+int mod;
+const int MAX = 32;
+//注意矩阵下标以0开始
+struct MAT
+{
+    int r, c, d[MAX][MAX];
+
+    MAT(int size) //初始为单位矩阵
+    {
+        r=c=size;
+        clr(d,0);
+        for(int i=0; i<size; i++)
+            d[i][i]=1;
+    }
+    MAT(int _r,int _c) //初始为全零矩阵
+    {
+        r=_r,c=_c;
+        clr(d,0);
+    }
+
+    friend MAT operator+(const MAT& m1,const MAT &m2);
+    friend MAT operator*(const MAT& m1,const MAT &m2);
+
+    MAT pow(int n)
+    {
+        MAT t = *this,ans(r);
+        for(; n; n>>=1)
+        {
+            if(n&1)	ans = t * ans;
+            t = t * t;
+        }
+        return ans;
+    }
+
+    MAT sum(int n)
+    {
+        MAT I(r),ans(r);
+        if(n == 1)  return *this;
+        ans = (pow((n+1)>>1) + I) * sum(n>>1);
+        if(n&1) ans = pow((n+1)>>1) + ans;
+        return ans;
+    }
+};
+
+MAT operator+(const MAT& m1,const MAT &m2)
+{
+    MAT ret(m1.r,m2.c);
+
+    for(int i=0; i<m1.r; i++)
+        for(int j=0; j<m1.c; j++)
+            ret.d[i][j] = (m1.d[i][j] + m2.d[i][j])%mod;
+    return ret;
+}
+
+MAT operator*(const MAT& m1,const MAT &m2)
+{
+    MAT ret(m1.r,m2.c);
+    for(int i=0; i<m1.r; i++)
+        for(int j=0; j<m1.c; j++)
+            if(m1.d[i][j])
+                for(int k=0; k!=m2.c; k++)
+                    if(m2.d[j][k])
+                        ret.d[i][k] = (ret.d[i][k] + (m1.d[i][j] * m2.d[j][k]))% mod;
+    return ret;
+}

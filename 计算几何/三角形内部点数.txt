@@ -1,0 +1,128 @@
+//HDU 4353
+const double PI = acos(-1.);
+
+struct cpoint{
+    LL x,y;
+    int id;
+    double ang;
+    cpoint(LL a=0,LL b=0)    {x=a,y=b;}
+
+    cpoint operator- (const cpoint &u) const{
+        return cpoint(x-u.x, y-u.y);
+    }
+
+    LL operator* (const cpoint &u) const{
+        return x*u.y - y*u.x;
+    }
+
+    void read() {scanf("%I64d%I64d",&x,&y);}
+}p[210],q[510],tmp[810];
+
+int tot[210][210], r[210][210];
+int T,n,m;
+
+LL cross(cpoint o, cpoint p, cpoint q) { // 叉积
+    return (p-o) * (q-o);
+}
+
+bool cmp(const cpoint& a,const cpoint& b){
+    return a.ang < b.ang;
+}
+
+int cal(int a,int b,int c)
+{
+    if(tot[a][c] > tot[a][b])   return tot[a][c] - tot[a][b];
+    else if(tot[a][c] < tot[a][b])   return m - (  tot[a][b] - tot[a][c] );
+    else
+    {
+        double ang1 = atan2( (double)(p[b].y-p[a].y), (double)(p[b].x-p[a].x) );
+        double ang2 = atan2( (double)(p[c].y-p[a].y), (double)(p[c].x-p[a].x) );
+        if(ang2 > ang1) return tot[a][c] - tot[a][b];
+        else    return m - (  tot[a][b] - tot[a][c] );
+    }
+}
+
+int main()
+{
+    scanf("%d",&T);
+    for(int cas = 1; cas <= T; cas++)
+    {
+        scanf("%d%d",&n,&m);
+
+        for(int i=1; i<=n; i++) p[i].read();
+        for(int i=1; i<=m; i++) q[i].read();
+        clr(r,0), clr(tot,0);
+
+        for(int i=1; i<=n; i++)
+        {
+            int cnt = 0;
+            //算所有点相对于这个点的极角序
+            for(int j=1; j<=n; j++)
+            {
+                if(i == j)  continue;
+                tmp[++cnt].ang = atan2( (double)(p[j].y - p[i].y) , (double)(p[j].x - p[i].x) );
+                tmp[cnt].id = j;
+            }
+
+            for(int j=1; j<=m; j++)
+            {
+                tmp[++cnt].ang = atan2( (double)(q[j].y - p[i].y) , (double)(q[j].x - p[i].x) );
+                tmp[cnt].id = -1;
+            }
+            sort(tmp+1, tmp+1+cnt, cmp);
+
+            //计算tot 和 r
+            int cc = 0;
+            for(int j=1; j<=cnt; j++)
+            {
+                if(tmp[j].id == -1) cc++;
+                else    tot[i][ tmp[j].id ] = cc;
+            }
+
+            int cur = 1, t = 0;
+            for(int j=1; j<=cnt; j++)
+            {
+                if(tmp[j].ang > eps)    break;
+                if(tmp[j].id == -1) continue;
+
+                double lim = tmp[j].ang + PI;
+                while(cur <= cnt && tmp[cur].ang < lim)
+                {
+                    if(tmp[cur].id == -1)   t++;
+                    cur++;
+                }
+
+                r[i][tmp[j].id ] = m - (t - tot[i][tmp[j].id] );
+                r[tmp[j].id ][i] = t - tot[i][tmp[j].id];
+            }
+        }
+
+        double ans = 1E100;
+        bool ok = false;
+
+        //枚举三角形
+        for(int i=1; i<=n; i++)
+            for(int j=i+1; j<=n; j++)
+                for(int k=j+1; k<=n; k++)
+                {
+                    int a = i, b = j, c = k;
+                    if(cross(p[a], p[b], p[c]) < 0)
+                        swap(b, c);
+
+                    int v = r[a][b] + r[b][c] + r[c][a];
+                    v += cal(a,b,c) + cal(b,c,a) + cal(c,a,b);
+                    v -= 2*m;
+
+                    if(v != 0)
+                    {
+                        ok = true;
+                        double area = (fabs)(((p[b].x - p[a].x)*(p[c].y-p[a].y) - (p[c].x-p[a].x)*(p[b].y-p[a].y))*0.5);
+                        ans = min(ans, area/v );
+                    }
+                }
+        printf("Case #%d: ",cas);
+        if(!ok) printf("-1\n");
+        else    printf("%.6f\n",ans);
+    }
+    return 0;
+}

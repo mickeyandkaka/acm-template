@@ -1,0 +1,15 @@
+const int MAX = 1000;
+typedef int type;
+//Ð¡¸ù¶Ñ
+bool cmp(const type &a,const type &b)   {return a>b;}
+struct heap
+{
+    int sz;
+    type d[MAX];
+    
+    heap()  {sz = 0,clr(d,0);}
+    type top()  {return d[0];}
+    void pop()  {pop_heap(d,d+sz,cmp);sz--;}
+    void push(type a)   {d[sz++] = a;push_heap(d,d+sz,cmp);}
+    bool empty()    {return sz==0;}
+};

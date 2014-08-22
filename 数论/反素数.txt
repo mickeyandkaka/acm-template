@@ -1,0 +1,21 @@
+LL ans, sum, n;
+void dfs(int l, bint cur, ULL cnt, int dep)
+{
+    if(n < cur) return ;
+	if(dep > D){
+		if(cnt > sum || (cnt == sum && cur < ans))
+			ans = cur, sum = cnt;
+		return ;
+	}
+    for(int i=1; i<=min(l, lim[dep]); i++){
+		cur = cur * prm[dep];
+		dfs(i, cur, cnt*(i+1), dep+1);
+	}
+}
+求出<=n的反素数
+dfs(13,1,1,1);
+
+//约数的个数记做g(x) 如果某个正整数x满足:对于任意i(0<i<x),都有g(i)<g(x),则称x为反素数.
+//性质一:一个反素数的质因子必然是从2开始连续的质数.
+//性质二:p=2^t1*3^t2*5^t3*7^t4.....必然t1>=t2>=t3>=....
+//对于N<=1e100 质数到350以内 int lim[] = {0,13, 9, 5, 4, 2, 2, 2, 2, 2, 1}; 枚举上界质数

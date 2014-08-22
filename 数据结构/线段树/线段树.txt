@@ -1,0 +1,79 @@
+//某层有LAZY标记 当前层一定要计算好 记住是已经计算好的
+//标记下传的时候 左右儿子的LAZY和SUM（数据）要计算好 （根据上面）
+//当前层的LAZY 清空
+//叶子的LAZY没用
+//该线段数为左闭右开[L,R)  但是接口为闭区间[L,R] 模板勿抄错 小心
+
+#define L(x)    x<<1
+#define R(x)    x<<1|1
+
+struct st
+{
+    int l,r;
+    LL lazy,maxi;
+}seg[1000010<<2];
+
+void pushup(int rt)
+{
+}
+
+void pushdown(int rt)
+{
+    if(seg[rt].lazy)
+    {
+        seg[rt].lazy = 0;
+    }
+}
+
+void build(int l,int r,int rt = 1)
+{
+	if(rt == 1)	r++;
+    seg[rt].l = l, seg[rt].r = r;
+    seg[rt].lazy = 0;
+
+    if(l + 1 == r)
+    {
+        seg[rt].maxi= 0;
+        return ;
+    }
+
+    int mid = (l + r)>>1;
+    build(l, mid, L(rt));
+    build(mid, r, R(rt));
+
+    pushup(rt);
+}
+
+void modify(int l,int r,int val,int rt = 1)
+{
+    if(rt == 1) r++;
+    if(l<=seg[rt].l && seg[rt].r<=r)
+    {
+		//操作
+        return ;
+    }
+
+    pushdown(rt);
+
+    int mid = (seg[rt].l + seg[rt].r)>>1;
+    if(l < mid) modify(l,r,val,L(rt));
+    if(r > mid) modify(l,r,val,R(rt));
+
+    pushup(rt);
+}
+
+LL query(int l,int r,int rt = 1)
+{
+    if(rt == 1) r++;
+    if(l <=seg[rt].l && seg[rt].r<=r)
+        return seg[rt].maxi;
+
+    pushdown(rt);
+
+    int mid = (seg[rt].l + seg[rt].r)>>1;
+    LL maxi = 0;
+    if(l < mid) maxi = max(maxi, query(l,r,L(rt)) );
+    if(r > mid) maxi = max(maxi, query(l,r,R(rt)) );
+
+    return maxi;
+}

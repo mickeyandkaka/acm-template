@@ -1,0 +1,61 @@
+struct cpoint{
+    double x,y;
+    cpoint(double a=0.0,double b=0.0)	{x=a,y=b;}
+
+    cpoint operator-(const cpoint &u) const{
+        return cpoint(x-u.x, y-u.y);
+    }
+
+    double operator*(const cpoint &u) const{
+        return x*u.y - y*u.x;
+    }
+
+    double operator^(const cpoint &u) const{
+        return x*u.x + y*u.y;
+    }
+};
+
+int dcmp(double x) { 
+	if (x < -eps) return -1; else return x > eps; 
+} 
+
+double dis(cpoint p, cpoint q) { // 两点距离 
+	return sqrt((p.x-q.x)*(p.x-q.x) + (p.y-q.y)*(p.y-q.y)); 
+}
+
+double cross(cpoint o, cpoint p, cpoint q) { // 叉积 
+	return (p-o) * (q-o); 
+} 
+
+double dot(cpoint o, cpoint p, cpoint q) { // 点积 
+	return (p-o) ^ (q-o); 
+}
+
+bool PointOnLine(cpoint p0, cpoint p1, cpoint  p2) { // 判点p0在直线上p1p2 
+	return dcmp(cross(p0, p1, p2)) == 0; 
+}
+
+double PointToLine(cpoint p0, cpoint p1, cpoint p2, cpoint &cp) { // 点到直线的距离，cp为点p0在直线上的射影 
+	double d = dis(p1, p2); 
+	double s = cross(p1, p2, p0) / d ; 
+	cp.x = p0.x + s * (p2.y - p1.y) / d; 
+	cp.y = p0.y - s * (p2.x - p1.x) / d; 
+	return fabs(s);  // s为有向距离 
+}
+
+bool  PointOnSegment(cpoint p0, cpoint p1, cpoint p2){ //判点p0在线段上p1p2 
+	return dcmp(cross(p0, p1, p2)) == 0 && dcmp(dot(p0, p1, p2)) <= 0; 
+}
+
+double PointToSeg(cpoint p0, cpoint p1, cpoint p2)  {	//点到线段最短距离
+    cpoint cp;
+    double d = PointToLine(p0, p1, p2, cp);
+    if (PointOnSegment(cp, p1, p2)) return d;
+    else return min(dis(p0, p1), dis(p0, p2));
+}
+
+double DisPallSeg(cpoint p0,cpoint p1,cpoint p2, cpoint p3) {	//两平行线段距离
+    return min( min(PointToSeg(p0, p2, p3),PointToSeg(p1, p2, p3)),
+                min(PointToSeg (p2, p0, p1), PointToSeg(p3, p0, p1)) );
+}
+

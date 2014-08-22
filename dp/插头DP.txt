@@ -1,0 +1,108 @@
+//多条回路注释掉lft==1 && top==2 && rt!=2
+//固定首末的简单回路可以加框或初始化给一个插头
+const int HS = 30007;
+struct hash_map{
+    int n,head[HS],next[HS],msk[HS];
+    LL val[HS];
+    void clear(){
+        clr(head,-1);
+        n = 0;
+    }
+
+    void push(int num, LL value){
+        int x = num % HS;
+        for(int i=head[x]; ~i; i=next[i]){
+            if(msk[i] == num){
+                val[i] += value;
+                return ;
+            }
+        }
+        msk[n] = num,val[n] = value;
+        next[n] = head[x];
+        head[x] = n++;
+    }
+}HM[2];
+hash_map *src = HM,*des = HM + 1;
+
+void chline(){
+    for(int k=0; k<src->n; k++){
+        if((src->msk[k] & 3) != 0)
+            src->val[k] = 0;    //最后不能有括号
+        src->msk[k] >>= 2;      //换行转移
+    }
+}
+
+int getmsk(int msk,int j){
+    j = m+1-j;
+    return (msk >> (j<<1)) & 3;
+}
+
+int getpos(int msk,int j){
+    int stk[20],top = 0;
+    for(int i=m+1; i>=1; i--,msk >>= 2){
+        if((msk & 3) == 2)  stk[++top] = i;
+        else if((msk & 3) == 1){
+            if(j == i)  return stk[top];
+            if(j == stk[top])   return i;
+            top--;
+        }
+    }
+}
+
+void ac(int j,int msk,LL val,int rt){
+    if(val == 0)    return;
+    int tmp = msk & ~(15 << ((m - j) << 1 ));  //移去上个状态两个插头
+    int lft = getmsk(msk, j), top = getmsk(msk, j+1);   //得到上个位置的左插头和上插头
+    if(rt == 0){    //格子不能走时2个位置没插头才能转移
+        if(lft == 0 && top == 0)
+            des->push(msk, val);
+    }
+    else{
+        if(lft == 0 && top == 0)    //新建插头
+            des->push(tmp | (6 <<((m-j)<<1) ), val);
+        else if(lft > 0 && top > 0) { //合并插头
+            if(lft == top){
+                if(lft == 1){   //2.1 top左括号对应的右括号变左括号((..))->00..()
+                    int x = getpos(msk, j+1);
+                    tmp -= (1 << ((m+1-x)<<1));
+                    des->push(tmp, val);
+                }
+                else{   //2.2 lft右括号对应的左括号变右括号((..))->()..00
+                    int x = getpos(msk, j);
+                    tmp += (1 << ((m+1-x)<<1));
+                    des->push(tmp, val);
+                }
+            }
+            else{
+                if(lft==1 && top==2 && rt!=2) return ;
+                des->push(tmp, val); //2.3 2.4相连即可
+            }
+        }
+        else{ //延续存在的插头
+            int x = lft + top, c = m-j;
+            des->push(tmp | (x << (c<<1) ), val);    //空+右
+            des->push(tmp | (x << ((c+1)<<1) ), val);//下+空
+        }
+    }
+}
+
+//4进制括号表示
+LL plugDP(int n,int m){
+    src->clear(),src->push(0,1);
+    for(int i=1; i<=n; i++){
+        for(int j=1; j<=m; j++){
+            des->clear();
+            for(int k=0; k<src->n; k++)
+                ac(j,src->msk[k],src->val[k],g[i][j]);
+
+            swap(src, des);
+            if(g[i][j] == 2){
+                for(int k=0; k<src->n; k++)
+                    if(src->msk[k] == 0)
+                        return src->val[k];
+            }
+        }
+        chline();
+    }
+    return 0;
+}

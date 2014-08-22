@@ -1,0 +1,25 @@
+LL product_mod(LL a,LL p,LL mod);
+LL power_mod(LL a,LL p,LL mod);
+
+bool isprime(LL n)
+{
+    if(n==2)return true;
+    if(n<2 || !(n&1))return false;
+    int i,j,k = 0;
+    LL pri[] = {2,3,5,7,11,13,17,23,37,51,61};
+    LL a,m = n-1;
+    while(m % 2 == 0) m>>=1,k++;
+    for(i=0; i<11; i++)
+    {
+        if(pri[i]>=n)   return true;
+        a = power_mod(pri[i], m, n);
+        if(a == 1) continue;
+        for(j=0; j<k; j++)
+        {
+            if(a == n-1)    break;
+            a = product_mod(a,a,n);
+        }
+        if(j==k)    return false ;
+    }
+    return true;
+}

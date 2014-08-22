@@ -1,0 +1,56 @@
+const int NV = 10010;
+const int NE = 50010;
+
+int n,m;
+bool instack[NV];
+int dfn[NV],low[NV],s[NV],belong[NV],color[NV];
+int scc,dindex,stop;
+int head[NV],e;
+struct E
+{
+    int u,v,next;
+} edge[NE];
+
+struct Tarjan
+{
+    Tarjan()
+    {
+        clr(head,-1),e = scc = dindex = stop = 0;
+        clr(dfn,0),clr(low,0),clr(instack,false);
+    }
+
+    void addedge(int u,int v)
+    {edge[e].u = u,edge[e].v = v,edge[e].next = head[u],head[u] = e++;}
+
+    void tarjan(int x)
+    {
+        int y;
+        dfn[x] = low[x] = ++dindex;
+        instack[x] = true,s[++stop] = x;
+        for(int i=head[x]; ~i; i=edge[i].next)
+        {
+            y = edge[i].v;
+            if(!dfn[y])
+            {
+                tarjan(y);
+                low[x] = min(low[x],low[y]);
+            }
+            else if(instack[y])
+                low[x] = min(low[x],dfn[y]);
+        }
+
+        if(dfn[x] == low[x])
+        {
+            scc++;
+            do{
+                y = s[stop--];
+                instack[y] = false;
+                belong[y] = scc;
+                color[scc]++;
+            }while(x != y);
+        }
+    }
+
+    void solve()
+    {for(int i=1; i<=n; i++) if(!dfn[i]) tarjan(i);}
+};

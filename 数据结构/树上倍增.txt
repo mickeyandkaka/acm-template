@@ -1,0 +1,31 @@
+dfsÀ„dep[] p[][0] dis[][0]
+for (int i = 1; i < 20; ++i)
+			for(int u = 1; u <= n; u++)
+				if (p[u][i - 1] != -1)
+				{
+					p[u][i] = p[ p[u][i - 1] ][i - 1];
+					if(p[u][i] != -1)
+						dis[u][i] = dis[u][i-1] + dis[ p[u][i - 1] ][i - 1];
+				}
+
+int moveDep(int x,int dep)
+{
+	while (dep > 0) {
+		x = p[x][ lg2[dep] ];
+		dep -= 1 << lg2[dep];
+	} return x;
+}
+
+int lca(int x,int y)
+{
+	if (dep[x] > dep[y])	x = moveDep(x, dep[x] - dep[y]);
+	else	y = moveDep(y, dep[y] - dep[x]);
+	while(x != y)
+	{
+		int now = 0;
+		while(p[x][now] != p[y][now] )	now++;
+		if(now) now--;
+		x = p[x][now], y = p[y][now];
+	}
+	return x;
+}

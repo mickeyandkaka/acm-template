@@ -1,0 +1,39 @@
+const int NV = 10000;
+const int NE = 20000*2;
+
+priority_queue<PII,vector<PII>,greater<PII> > q;
+bool vis[NV];
+int head[NV],e,d[NV];
+int ed[NE],w[NE],nxt[NE];
+
+void addedge(int u,int v,int val)
+{
+    ed[e] = v,w[e] = val;
+    nxt[e] = head[u],head[u] = e++;
+}
+
+void dijkstra(int st,int n)
+{
+    for(int i=1; i<=n; i++) d[i] = (i==st ? 0 : INF);
+    clr(vis,false);
+    while(!q.empty())   q.pop();
+
+    q.push(MP(d[st],st));
+    while(!q.empty())
+    {
+        PII t = q.top(); q.pop();
+        int u = t.second;
+
+        if(vis[u])  continue;
+        vis[u] = true;
+        for(int i=head[u]; ~i; i=nxt[i])
+        {
+            int v = ed[i], val = w[i];
+            if(d[v] > d[u]+val)
+            {
+                d[v] = d[u]+val;
+                q.push(MP(d[v],v));
+            }
+        }
+    }
+}

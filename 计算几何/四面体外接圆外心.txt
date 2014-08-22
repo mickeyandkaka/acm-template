@@ -1,0 +1,16 @@
+double cal(double a1,double a2,double a3,double b1,double b2,double b3,double c1,double c2,double c3) {
+    return a1*(b2*c3-b3*c2) - b1*(a2*c3-a3*c2) + c1*(a2*b3-a3*b2);
+}
+
+void center3(cpoint p0, cpoint p1, cpoint p2, cpoint p3,cpoint &cp) { //四面体外心
+    double a1 = p1.x-p0.x, b1 = p1.y-p0.y, c1 = p1.z-p0.z, d1 = (a1*(p1.x+p0.x) + b1*(p1.y+p0.y) + c1*(p1.z+p0.z))/2;
+    double a2 = p2.x-p0.x, b2 = p2.y-p0.y, c2 = p2.z-p0.z, d2 = (a2*(p2.x+p0.x) + b2*(p2.y+p0.y) + c2*(p2.z+p0.z))/2;
+    double a3 = p3.x-p0.x, b3 = p3.y-p0.y, c3 = p3.z-p0.z, d3 = (a3*(p3.x+p0.x) + b3*(p3.y+p0.y) + c3*(p3.z+p0.z))/2;
+
+    double q,q1,q2,q3;
+    q = cal(a1,a2,a3,b1,b2,b3,c1,c2,c3);
+    q1 = cal(d1,d2,d3,b1,b2,b3,c1,c2,c3);
+    q2 = cal(a1,a2,a3,d1,d2,d3,c1,c2,c3);
+    q3 = cal(a1,a2,a3,b1,b2,b3,d1,d2,d3);
+    cp.x = q1/q, cp.y = q2/q, cp.z = q3/q;
+}

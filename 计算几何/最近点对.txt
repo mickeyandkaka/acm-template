@@ -1,0 +1,24 @@
+double solve(int l,int r)
+{
+    if(l == r)  return 1e10;
+
+    int mid = (l + r)>>1;
+    double d = min(solve(l,mid), solve(mid+1, r)), ret = d;
+    double x = (p[mid].x + p[mid+1].x)/2.0;
+
+    int st, ed, lo, hi;
+    for(st = mid; st>=l && p[st].x + d + eps >= x; st--);st++;
+    for(ed = mid+1; ed<=r && p[ed].x - d - eps <= x; ed++);ed--;
+
+    sort(p+st, p+mid+1, cmpy);
+    sort(p+mid+1, p+ed+1 , cmpy);
+    lo = hi = mid+1;
+
+    for(int i=st; i<=mid; i++)
+    {
+        while(lo < ed && p[lo].y + d + eps <= p[i].y)    lo++;
+        while(hi < min(ed, lo+5) &&  p[hi].y - d - eps <= p[i].y)    hi++;
+        for(int j=lo; j<=hi; j++) ret = min(ret, dis(p[i], p[j]));
+    }
+    return ret;
+}
