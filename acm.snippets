@@ -1,0 +1,234 @@
+# add 'extend acm to cpp.snippets'
+
+priority -50
+
+# math begin
+snippet seiveprime "seive prime numbers"
+const int PRMLIM = 200000;
+bool notprm[PRMLIM + 5];
+int prm[PRMLIM >> 3];
+int seive_prime(int lim) {
+    //clr(notprm, false); // default is false
+    notprm[0] = notprm[1] = true;
+    int cnt = 0;
+    for(int i=2; i<=lim; i++) {
+        if(!notprm[i]) prm[cnt++] = i;
+        for(int j=0; j<cnt; j++) {
+            if(i * prm[j] > lim) break;
+            notprm[i * prm[j]] = true;
+            if(i % prm[j] == 0) break;
+        }
+    }
+    return cnt;
+}
+endsnippet
+
+snippet fft "fast fourier transformation"
+const int FFTSZ = 1<<20; //TODO 2^18 = 262144 2^20=1048576
+const double pi = acos(-1.);
+struct cp{
+    double real, img;
+    cp(double _r=0.0, double _i=0.0):real(_r),img(_i){}
+    cp operator +(const cp &c) const {
+        return cp(real+c.real, img+c.img);
+    }
+    cp operator -(const cp &c) const {
+        return cp(real-c.real, img-c.img);
+    }
+    cp operator *(const cp &c) const {
+        return cp(real*c.real-img*c.img, real*c.img+img*c.real);
+    }
+};
+
+// dft -> op = 1 idft -> op = -1
+// n should equal 2^k > len, cp is 0-based
+void fft(cp x[], int n, int op) {
+    for(int i=1, j=0; i<n; i++) {
+        for(int l=n>>1; (j^=l)<l; l>>=1);
+        if (i < j) swap(x[i], x[j]);
+    }
+
+    for(int h=2; h<=n; h<<=1) {
+        cp wn(cos(-op*2*pi/h), sin(-op*2*pi/h));
+        for(int j=0; j<n; j+=h) {
+            cp w(1, 0);
+            for(int k=j; k<j+h/2; k++) {
+                cp u = x[k], v = w * x[k + h/2];
+                x[k] = u + v, x[k + h/2] = u - v;
+                w = w * wn;
+            }
+        }
+    }
+
+    if(op == -1)
+        for(int i=0; i<n; i++) x[i].real /= n, x[i].img /= n;
+}
+
+// return lena + lenb - 1 for length of c
+cp x[FFTSZ], y[FFTSZ];
+int convolution(int a[], int lena, int b[], int lenb, int c[]) {
+    int len = 1;
+    while(len < lena + lenb - 1) len <<= 1;
+
+    for(int i=0; i<len; i++) {
+        if(i < lena) x[i] = cp(a[i] * 1.0, 0.0);
+        else x[i] = cp(0.0, 0.0);
+    }
+
+    for(int i=0; i<len; i++) {
+        if(i < lenb) y[i] = cp(b[i] * 1.0, 0.0);
+        else y[i] = cp(0.0, 0.0);
+    }
+
+    fft(x, len, 1), fft(y, len, 1);
+    for(int i=0; i<len; i++) x[i] = x[i] * y[i];
+    fft(x, len, -1);
+
+    len = lena + lenb - 1;
+    c[len] = 0;
+    for(int i=0; i<len; i++)
+        c[i] = int(x[i].real + 0.5);
+    return len;
+}
+endsnippet
+
+snippet kitamasa "for linear polynomial"
+//0-based  c is coeffcient
+int k; // TODO need init k
+const LL mod = 104857601;
+const int K = 3010;
+void addone(LL x[], LL c[]) {
+    int last = x[k-1];
+    for(int i=k-1; i>=1; i--)
+        x[i] = (last * c[i] + x[i-1]) % mod;
+    x[0] = (last * c[0]) % mod;
+}
+
+void kitamasa(LL x[], LL c[], LL nth) {
+    if(nth < k) {
+        for(int i=0; i<k; i++)
+            x[i] = (i == nth);
+        return;
+    }
+
+    if(nth & 1){
+        kitamasa(x, c, nth-1);
+        addone(x, c);
+    }
+    else {
+        LL tmp[K], tmp2[K];
+        kitamasa(tmp, c, nth >> 1);
+        memcpy(tmp2, tmp, sizeof(tmp2));
+
+        for (int i=0; i<k; i++)
+            x[i] = (tmp2[0] * tmp[i]) % mod;
+        for (int i=1; i<k; i++) {
+            addone(tmp, c);
+            for (int j=0; j<k; ++j) {
+                x[j] = (x[j] + tmp2[i] * tmp[j]) % mod;
+            }
+        }
+    }
+}
+endsnippet
+
+# math end
+
+
+# graph begin
+snippet maxflow "sap algorithm for maxflow"
+const int NV = 1000, NE = 100005 * 2;
+int head[NV], e, d[NV], vd[NV], pre[NV], cur[NV];
+struct E{
+    int u,v,w,next;
+}edge[NE];
+
+struct flow{
+    flow()   {clr(head,-1), e = 0;}
+    inline void addedge(int u, int v, int w){
+        edge[e].u = u, edge[e].v = v, edge[e].w = w, edge[e].next = head[u], head[u]=e++;
+        edge[e].u = v, edge[e].v = u, edge[e].w = 0, edge[e].next = head[v], head[v]=e++;
+    }
+
+    int sap(int s, int t, int n){
+        if(s == t) return 0;
+        int i, mini, u = s, ret = 0;
+        clr(d,0), clr(vd,0);
+        vd[0] = n, cur[s] = head[s], pre[s] = -1;
+
+        while(d[s] < n){
+            if(u == t){
+                for(mini = INF, i = pre[u]; ~i; i = pre[edge[i].u])
+                    mini = min(mini, edge[i].w);
+                for(i = pre[u]; ~i; i = pre[edge[i].u])
+                    edge[i].w -= mini,edge[i^1].w += mini;
+                ret += mini, u = s;
+            }
+
+            for(i = cur[u]; ~i; i = edge[i].next)
+                if(edge[i].w >0 && d[u] == d[edge[i].v]+1){
+                    cur[u] = i;
+                    pre[u = edge[i].v] = i;
+                    break;
+                }
+
+            if(i == -1){
+                if(--vd[d[u]] == 0) break;
+                vd[++d[u] ]++;
+                cur[u] = head[u];
+                if(u != s)  u = edge[pre[u]].u;
+            }
+        }
+        return ret;
+    }
+};
+endsnippet
+# graph end
+
+
+# string begin
+snippet kmp "kmp algorithm"
+/* fail example
+   a b a b a c a b a
+f: 0 0 1 2 3 0 1 2 3
+*/
+int s[1000010], p[10010];
+int lens, lenp;
+
+int fail[10010];
+void makefail(int* p, int len) {
+    clr(fail, 0);
+    for(int i=1, j=0; i<len; i++) {
+        while(j && p[i] != p[j]) j = fail[j-1];
+        if(p[i] == p[j]) j++;
+        fail[i] = j;
+    }
+}
+
+// find whether p is in s
+int kmp(int* s, int* p) {
+    //int lens = strlen(s), lenp = strlen(p);
+    makefail(p, lenp);
+    //int ret = 0;
+
+    for(int i=0, j=0; i<lens; i++) {
+        while(j && s[i] != p[j]) j = fail[j-1];
+
+        if(s[i] == p[j]) j++;
+        if(j == lenp){
+            //cout << "fuck" << endl;
+            return i - lenp + 1;
+            //ret ++;
+            //j = fail[j];
+        }
+    }
+    return -1;
+}
+endsnippet
+
+
+
+
+
+
+# vim:ft=snippets:
