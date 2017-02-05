@@ -2,7 +2,30 @@
 
 priority -50
 
+# util begin
+snippet for1 "for int loop (for1)"
+for(int ${2:i}=1; $2<=n; ${3:++$2})
+{
+
+}
+endsnippet
+
+# util end
+
 # math begin
+
+snippet power_mod "power_mod"
+LL power_mod(LL a, LL p, LL mod) {
+    LL r = 1;
+    while(p) {
+        if(p&1) r = r * a % mod;
+        a = a * a % mod;
+        p>>=1;
+    }
+    return r;
+}
+endsnippet
+
 snippet seiveprime "seive prime numbers"
 const int PRMLIM = 200000;
 bool notprm[PRMLIM + 5];
@@ -136,6 +159,93 @@ endsnippet
 
 
 # graph begin
+snippet edge "edge related"
+int head[N], e;
+struct E{
+    int v, next;
+}edge[N << 1];
+
+void addedge(int u, int v){
+    edge[e].v = v, edge[e].next = head[u];
+    head[u] = e++;
+}
+endsnippet
+
+snippet dij "dijkstra algorithm"
+const int NV = 100010, NE = 400010;
+priority_queue<PII,vector<PII>,greater<PII> > q;
+bool vis[NV];
+int head[NV], e, d[NV];
+int ed[NE], w[NE], nxt[NE];
+
+void addedge(int u, int v, int val) {
+    ed[e] = v, w[e] = val, nxt[e] = head[u];
+    head[u] = e++;
+}
+
+void dijkstra(int st, int n) {
+    for(int i=1; i<=n; i++) d[i] = (i==st ? 0 : INF);
+    clr(vis, false);
+    while(!q.empty())   q.pop();
+
+    q.push({d[st], st});
+    while(!q.empty()) {
+        PII t = q.top(); q.pop();
+        int u = t.second;
+
+        if(vis[u])  continue;
+        vis[u] = true;
+        for(int i=head[u]; ~i; i=nxt[i]) {
+            int v = ed[i], val = w[i];
+            if(d[v] > d[u] + val) {
+                d[v] = d[u] + val;
+                q.push({d[v], v});
+            }
+        }
+    }
+}
+endsnippet
+
+snippet tarjan "tarjan algorithm"
+const int N = 100010;
+int dfn[N], low[N], idx, scc;
+int stk[N], instk[N], top;
+
+void dfs(int u){
+    dfn[u] = low[u] = ++idx;
+    stk[top++] = u, instk[u] = true;
+
+    for(int i=head[u]; ~i; i=edge[i].next){
+        int v = edge[i].v;
+        if(dfn[v] == -1){
+            dfs(v);
+            low[u] = min(low[u], low[v]);
+        }else if(instk[v] == true){
+            low[u] = min(low[u], dfn[v]);
+        }
+    }
+
+    int p;
+    if(low[u] == dfn[u]){
+        scc++;
+        do{
+            p = stk[--top];
+            instk[p] = false;
+        }while(u != p);
+    }
+}
+
+void tarjan(int n){
+    clr(dfn, -1), idx = scc = 0;
+    clr(instk, 0), top = 0;
+    for(int i=1; i<=n; i++)
+        if(dfn[i] == -1)
+            dfs(i);
+}
+endsnippet
+
+
+
 snippet maxflow "sap algorithm for maxflow"
 const int NV = 1000, NE = 100005 * 2;
 int head[NV], e, d[NV], vd[NV], pre[NV], cur[NV];
